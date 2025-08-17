@@ -1,0 +1,975 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenApi specification - MasterAnything",
+    "description": "OpenApi documentation for this Spring security",
+    "contact": {
+      "name": "MasterAnything",
+      "email": "stephane.nganou.w@snganou.de"
+    },
+    "license": {
+      "name": "License name",
+      "url": "http://.snganou.de"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8088/api/v1",
+      "description": "Local ENV"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT auth description"
+      }
+    },
+    "schemas": {
+      "AuthenticationRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email is required and should be valid"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Password is required and should be at least 8 characters"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "AuthenticationResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": ["token"]
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "First name is required and should be at least 1 character"
+          },
+          "last_name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Last name is required and should be at least 1 character"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email is required and should be valid: ex -> greatness@tali.de"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Password is required and should be at least 8 characters"
+          }
+        },
+        "required": ["first_name", "last_name", "email", "password"]
+      },
+      "BookRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Title is required and should be at least 1 character"
+          },
+          "author_name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Author name is required and should be at least 1 character"
+          },
+          "isbn": {
+            "type": "string",
+            "minLength": 10,
+            "description": "ISBN is required and should be at least 10 characters"
+          },
+          "synopsis": {
+            "type": "string",
+            "minLength": 10,
+            "description": "Synopsis is required and should be at least 10 characters"
+          },
+          "shareable": {
+            "type": "boolean",
+            "description": "Shareable must be set"
+          }
+        },
+        "required": ["title", "author_name", "isbn", "synopsis", "shareable"]
+      },
+      "BookResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "author_name": {
+            "type": "string"
+          },
+          "isbn": {
+            "type": "string"
+          },
+          "synopsis": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "cover": {
+            "type": "string",
+            "format": "byte"
+          },
+          "rate": {
+            "type": "number",
+            "format": "double"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "shareable": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "title", "author_name", "isbn", "synopsis", "owner", "rate", "archived", "shareable"]
+      },
+      "BorrowedBookResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "author_name": {
+            "type": "string"
+          },
+          "isbn": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number",
+            "format": "double"
+          },
+          "returned": {
+            "type": "boolean"
+          },
+          "return_approval": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "title", "author_name", "isbn", "rate", "returned", "return_approval"]
+      },
+      "FeedbackRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 5,
+            "description": "Note must be between 0 and 5"
+          },
+          "comment": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Comment is required and should be at least 1 character"
+          },
+          "book_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Book ID is required"
+          }
+        },
+        "required": ["note", "comment", "book_id"]
+      },
+      "FeedbackResponse": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "number",
+            "format": "double"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "own_feedback": {
+            "type": "boolean"
+          }
+        },
+        "required": ["note", "comment", "own_feedback"]
+      },
+      "PageResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "number": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "total_elements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_pages": {
+            "type": "integer"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          }
+        },
+        "required": ["content", "number", "size", "total_elements", "total_pages", "first", "last"]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "To manage Authentication"
+    },
+    {
+      "name": "Book",
+      "description": "Handles everything related to book component"
+    },
+    {
+      "name": "Feedback",
+      "description": "Handles everything related to Feedback component"
+    }
+  ],
+  "paths": {
+    "/auth/": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "authenticate",
+        "description": "Submit credentials to get valid token",
+        "operationId": "authenticate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "valid token returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "register",
+        "description": "Submit data to register a new user",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "User register successfully"
+          }
+        }
+      }
+    },
+    "/auth/activate-account": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "confirm",
+        "description": "Confirm User in order to activate the account.",
+        "operationId": "confirm",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Activation confirmed"
+          }
+        }
+      }
+    },
+    "/books/": {
+      "get": {
+        "tags": ["Book"],
+        "summary": "getAllBooks",
+        "description": "Returns a list of all available books",
+        "operationId": "getAllBooks",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List return successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponse",
+                  "properties": {
+                    "content": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BookResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Book"],
+        "summary": "saveBook",
+        "description": "Submit data to save a new book",
+        "operationId": "saveBook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Book register successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/books/{book-id}": {
+      "get": {
+        "tags": ["Book"],
+        "summary": "findBookById",
+        "description": "Search for a book by Id",
+        "operationId": "findBookById",
+        "parameters": [
+          {
+            "name": "book-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/books/owner": {
+      "get": {
+        "tags": ["Book"],
+        "summary": "getAllBooksByOwner",
+        "description": "Get all books belonging to the authenticated user",
+        "operationId": "getAllBooksByOwner",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of books",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponse",
+                  "properties": {
+                    "content": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BookResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/books/borrowed": {
+      "get": {
+        "tags": ["Book"],
+        "summary": "getAllBorrowedBooks",
+        "description": "Get all books borrowed by the authenticated user",
+        "operationId": "getAllBorrowedBooks",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of books",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponse",
+                  "properties": {
+                    "content": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BorrowedBookResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/books/returned": {
+      "get": {
+        "tags": ["Book"],
+        "summary": "getAllReturnedBooks",
+        "description": "Get all books returned by the authenticated user",
+        "operationId": "getAllReturnedBooks",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of books",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponse",
+                  "properties": {
+                    "content": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BorrowedBookResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/books/shareable/{book-id}": {
+      "patch": {
+        "tags": ["Book"],
+        "summary": "updateShareableStatus",
+        "description": "Update the shareable status of a targeted book",
+        "operationId": "updateShareableStatus",
+        "parameters": [
+          {
+            "name": "book-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Operation not permitted because not book owner"
+          },
+          "404": {
+            "description": "Book not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/books/borrow/{book-id}": {
+      "post": {
+        "tags": ["Book"],
+        "summary": "borrowBook",
+        "description": "Borrow a desired book",
+        "operationId": "borrowBook",
+        "parameters": [
+          {
+            "name": "book-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book borrowed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Operation not permitted because book owner"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "406": {
+            "description": "Book can not be borrowed"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/books/borrow/return/{book-id}": {
+      "patch": {
+        "tags": ["Book"],
+        "summary": "returnBorrowBook",
+        "description": "Return a borrowed book",
+        "operationId": "returnBorrowBook",
+        "parameters": [
+          {
+            "name": "book-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return operation successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "406": {
+            "description": "Book can not be returned"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/books/borrow/return/approve/{book-id}": {
+      "patch": {
+        "tags": ["Book"],
+        "summary": "approveReturnBorrowBook",
+        "description": "Approve the Return of a borrowed book",
+        "operationId": "approveReturnBorrowBook",
+        "parameters": [
+          {
+            "name": "book-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approve successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Operation not permitted because not book owner"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "406": {
+            "description": "Return can not be approved"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/books/cover/{book-id}": {
+      "post": {
+        "tags": ["Book"],
+        "summary": "uploadBookCoverPicture",
+        "description": "Update book cover",
+        "operationId": "uploadBookCoverPicture",
+        "parameters": [
+          {
+            "name": "book-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": " deer",
+                    "format": "binary"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update successfully"
+          },
+          "403": {
+            "description": "Operation not permitted because not book owner"
+          },
+          "404": {
+            "description": "Book not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/feedbacks/": {
+      "post": {
+        "tags": ["Feedback"],
+        "summary": "saveFeedback",
+        "description": "Submit data to save a new Feedback",
+        "operationId": "saveFeedback",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Feedback saved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "406": {
+            "description": "Can not add feedback to the given book"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/feedbacks/book/{book-id}": {
+      "get": {
+        "tags": ["Feedback"],
+        "summary": "findAllFeedbackByBook",
+        "description": "Get all feedbacks for given Book",
+        "operationId": "findAllFeedbackByBook",
+        "parameters": [
+          {
+            "name": "book-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponse",
+                  "properties": {
+                    "content": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FeedbackResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  }
+}
