@@ -12,7 +12,7 @@ import { RequestBuilder } from '../../request-builder';
 export interface UploadBookCoverPicture$Params {
   'book-id': number;
       body?: {
-'file':  deer;
+'file': Blob;
 }
 }
 

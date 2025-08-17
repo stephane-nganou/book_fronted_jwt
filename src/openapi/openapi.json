@@ -837,7 +837,7 @@
                 "type": "object",
                 "properties": {
                   "file": {
-                    "type": " deer",
+                    "type": "string",
                     "format": "binary"
                   }
                 },
