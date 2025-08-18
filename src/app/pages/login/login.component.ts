@@ -3,6 +3,7 @@ import { AuthenticationRequest } from '../../services/models';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../../services/services';
+import { TokenService } from '../../services/token/token.service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,8 @@ export class LoginComponent {
 
   constructor(
     private router: Router,
-    private authService: AuthenticationService
+    private authService: AuthenticationService,
+    private tokenService: TokenService
   ){}
 
   login() {
@@ -25,14 +27,18 @@ export class LoginComponent {
     this.authService.authenticate({
       body: this.authRequest
     }).subscribe({
-      next: () => {
+      next: (response) => {
         // save the token
+        this.tokenService.token = response.token as string;
+
         this.router.navigate(['books']);
       },
       error: (err) => {
         console.log(err);
-        if (err.error){
-          this.errorMsg = err.error.message
+        if (err.error.validationErrors && err.error.validationErrors > 0){
+          this.errorMsg = err.error.validationErrors
+        } else {
+          this.errorMsg.push(err.error.message);
         }
       }
     });

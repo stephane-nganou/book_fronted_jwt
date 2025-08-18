@@ -1,3 +1,11 @@
 import { Routes } from '@angular/router';
+import { LoginComponent } from './pages/login/login.component';
+import { RegisterComponent } from './pages/register/register.component';
+import { NotfoundComponent } from './pages/notfound/notfound.component';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+    {path: '', component: LoginComponent, title: 'Login page'},
+    {path: 'login', component: LoginComponent, title: 'Login page'},
+    {path: 'register', component: RegisterComponent, title: 'Register page'},
+    {path: '**', component: NotfoundComponent, title: 'PAGE NOT FOUND'}
+];
