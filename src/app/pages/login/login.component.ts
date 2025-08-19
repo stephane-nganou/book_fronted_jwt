@@ -35,7 +35,7 @@ export class LoginComponent {
       },
       error: (err) => {
         console.log(err);
-        if (err.error.validationErrors && err.error.validationErrors > 0){
+        if (err.error.validationErrors && err.error.validationErrors.length > 0){
           this.errorMsg = err.error.validationErrors
         } else {
           this.errorMsg.push(err.error.message);
