@@ -3,6 +3,8 @@ import { RegisterRequest } from '../../services/models';
 import { FormsModule } from "@angular/forms";
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../../services/services';
+import { JsonParserService } from '../../services/json-parser.service';
+import { ApiErrorResponse } from '../../services/models/api-error-response';
 
 @Component({
   selector: 'app-register',
@@ -17,12 +19,13 @@ export class RegisterComponent {
 
   constructor(
     private router: Router,
-    private authService: AuthenticationService
+    private authService: AuthenticationService,
+    private errorJsonService: JsonParserService
   ){
-    //
+    
   }
 
-  login() {
+  register() {
     this.errorMsg = []
     this.authService.register({
       body: this.registerRequest
@@ -31,15 +34,21 @@ export class RegisterComponent {
         this.router.navigate(['activate-account']);
       },
       error: (error) => {
-        if(error.error.validationErrors && error.error.validationErrors.length > 0){
-          this.errorMsg = error.error.validationErrors;
-        }else{
-          this.errorMsg.push(error.error.errorMessage);
+        const parsedError: ApiErrorResponse  = this.errorJsonService.parseErrorResponse(error.error);
+        if(null === parsedError.timestamp){
+          this.errorMsg.push("Something went wrong");
+          return;
         }
+        if(parsedError.validationErrors && parsedError.validationErrors.length > 0){
+          this.errorMsg = parsedError.validationErrors;
+        }else{
+          this.errorMsg.push(parsedError.errorMessage);
+        }
+        console.log(error);
       }
     })
   }
-  register() {
+  login() {
     this.router.navigate(['login']);
   }
 
