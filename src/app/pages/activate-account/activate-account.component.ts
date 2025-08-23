@@ -52,6 +52,8 @@ export class ActivateAccountComponent {
       const parsedError: ApiErrorResponse = this.errorParseService.parseErrorResponse(error.error);
       
       this.message = parsedError.errorMessage;
+      this.submitted = true;
+      this.isOkay = false;
       console.log(error);
     }
 }
