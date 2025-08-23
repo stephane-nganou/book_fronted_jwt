@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthenticationService } from '../../services/services';
 import { NgIf } from '@angular/common';
+import { JsonParserService } from '../../services/json-parser.service';
+import { ApiErrorResponse } from '../../services/models/api-error-response';
 @Component({
   selector: 'app-activate-account',
   imports: [NgIf, FormsModule],
@@ -18,7 +20,8 @@ export class ActivateAccountComponent {
 
   constructor(
     private router: Router,
-    private authService: AuthenticationService
+    private authService: AuthenticationService,
+    private errorParseService: JsonParserService
   ){}
 
   onCodeCompleted(){
@@ -40,11 +43,15 @@ export class ActivateAccountComponent {
         this.isOkay = true;
       },
       error: (error) => {
-        console.log(`Error: ${error}`)
-        this.message = error.error.message;
-        this.submitted = true;
-        this.isOkay = false;
+        this.handleError(error);
       }
     })
   }
+
+  private handleError(error: any) {
+      const parsedError: ApiErrorResponse = this.errorParseService.parseErrorResponse(error.error);
+      
+      this.message = parsedError.errorMessage;
+      console.log(error);
+    }
 }
