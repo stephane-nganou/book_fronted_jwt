@@ -4,10 +4,11 @@ import { Router } from '@angular/router';
 import { PageResponse } from '../../services/models';
 import { NgFor } from '@angular/common';
 import { PageBookResponse } from '../../services/models/page-book-response';
+import { BookCardComponent } from "./book-card/book-card.component";
 
 @Component({
   selector: 'app-books',
-  imports: [NgFor],
+  imports: [NgFor, BookCardComponent],
   templateUrl: './books.component.html',
   styleUrl: './books.component.css'
 })
