@@ -8,12 +8,13 @@ import { RouterLink } from '@angular/router';
   styleUrl: './menu.component.css'
 })
 export class MenuComponent implements OnInit {
+
   ngOnInit(): void {
     const linkColor = document.querySelectorAll('.nav-link');
     linkColor.forEach(link => {
-      if(window.location.href.endsWith(link.getAttribute('href') || '')){
-        link.classList.add('active');
-      }
+      //if(window.location.href.endsWith(link.getAttribute('href') || '')){
+      //  link.classList.add('active');
+      //}
       link.addEventListener('click', () => {
         linkColor.forEach(l => l.classList.remove('active'));
         link.classList.add('active');
@@ -21,7 +22,7 @@ export class MenuComponent implements OnInit {
     })
   }
   logout() {
-  throw new Error('Method not implemented.');
-}
+    throw new Error('Method not implemented.');
+  }
 
 }
