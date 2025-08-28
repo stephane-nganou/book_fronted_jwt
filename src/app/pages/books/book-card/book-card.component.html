@@ -1,6 +1,7 @@
 <div
     class="card"
     style="width: 20rem;"
+    *ngIf="book.id !== 0"
 >
     <img height="200" [src]="bookCover" class="card-img-top" alt="...">
     <div class="card-body overflow-scroll">

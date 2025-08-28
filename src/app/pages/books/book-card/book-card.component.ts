@@ -18,7 +18,18 @@ export class BookCardComponent {
   @Output() private edit: EventEmitter<BookResponse> = new EventEmitter<BookResponse>();
   @Output() private details: EventEmitter<BookResponse> = new EventEmitter<BookResponse>();
 
-  private _book: BookResponse = {};
+  private _book: BookResponse = {
+    archived: false,
+    author_name: '',
+    id: 0,
+    isbn: '',
+    owner: '',
+    rate: 0,
+    shareable: false,
+    synopsis: '',
+    title: ''
+  };
+  
   private _bookCover?: string | undefined;
   private _manage = false;
 
