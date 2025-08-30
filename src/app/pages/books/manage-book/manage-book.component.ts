@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { BookRequest } from '../../../services/models';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BookRequest, BookResponse } from '../../../services/models';
 import { FormsModule } from "@angular/forms";
 import { BookService } from '../../../services/services';
 import { JsonParserService } from '../../../services/json-parser.service';
@@ -12,12 +12,13 @@ import { ApiErrorResponse } from '../../../services/models/api-error-response';
   templateUrl: './manage-book.component.html',
   styleUrl: './manage-book.component.css'
 })
-export class ManageBookComponent {
+export class ManageBookComponent implements OnInit{
 
   constructor(
     private bookService: BookService,
     private errorParserService: JsonParserService,
-    private router: Router
+    private router: Router,
+    private activatedRoute: ActivatedRoute
   ){}
 
   errorMsg: Array<string> = [];
@@ -31,6 +32,28 @@ export class ManageBookComponent {
   selectedBookCover: any;
   selectedPicture?: string;
 
+  ngOnInit(): void {
+    const bookId = this.activatedRoute.snapshot.params['bookId'];
+    if(bookId){
+      this.bookService.findBookById({
+        'book-id': bookId
+      }).subscribe({
+        next: (bookResponse: BookResponse) => {
+          this.bookRequest = {
+            id: bookResponse.id,
+            title: bookResponse.title as string,
+            author_name: bookResponse.author_name as string,
+            isbn: bookResponse.isbn as string,
+            synopsis: bookResponse.synopsis as string,
+            shareable: bookResponse.shareable
+          }
+          if(bookResponse.cover){
+            this.selectedPicture = `data:image/jpg;base64,` + bookResponse.cover;
+          }
+        }
+      })
+    }
+  }
 
   onFileSelected(event: any) {
     this.selectedBookCover = event.target.files[0];
