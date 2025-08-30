@@ -35,12 +35,13 @@ export class MyBooksComponent implements OnInit {
 
   archiveBook(book: BookResponse) {
     this.message = '';
-    this.bookService.borrowBook({
+    this.bookService.updateArchiveStatus({
       "book-id": book.id as number
     }).subscribe({
-      next: (bookId) => {
+      next: () => {
+        book.archived = !book.archived;
         this.level = 'success';
-        this.message = `Book nr: ${bookId} successfully borrowed`;
+        this.message = "successful update"
       },
       error: (error) => {
         this.level = 'error';
@@ -50,7 +51,19 @@ export class MyBooksComponent implements OnInit {
   }
 
   shareBook(book: BookResponse) {
-    //
+    this.bookService.updateShareableStatus({
+      'book-id': book.id as number
+    }).subscribe({
+      next: () => {
+        book.shareable = !book.shareable;
+        this.level = 'success';
+        this.message = "successful update"
+      },
+      error: (error) => {
+        this.handleError(error);
+      }
+      
+    })
   }
 
   editBook(book: BookResponse) {
@@ -94,7 +107,6 @@ export class MyBooksComponent implements OnInit {
       })
       .subscribe({
         next: (books: PageResponse) => {
-          this.level = 'success';
           this.bookResponse = books as PageBookResponse;
         },
         error: (error) => {

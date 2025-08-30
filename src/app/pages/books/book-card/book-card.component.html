@@ -1,7 +1,10 @@
 <div
-    class="card"
-    style="width: 20rem;"
     *ngIf="book.id !== 0"
+    class="card border-2"
+    style="width: 20rem;"
+    [class.border-success]="book.shareable"
+    [class.border-warning]="book.archived"
+
 >
     <img height="200" [src]="bookCover" class="card-img-top" alt="...">
     <div class="card-body overflow-scroll">
