@@ -31,6 +31,8 @@ import { returnBorrowBook } from '../fn/book/return-borrow-book';
 import { ReturnBorrowBook$Params } from '../fn/book/return-borrow-book';
 import { saveBook } from '../fn/book/save-book';
 import { SaveBook$Params } from '../fn/book/save-book';
+import { updateArchiveStatus } from '../fn/book/update-archive-status';
+import { UpdateArchiveStatus$Params } from '../fn/book/update-archive-status';
 import { updateShareableStatus } from '../fn/book/update-shareable-status';
 import { UpdateShareableStatus$Params } from '../fn/book/update-shareable-status';
 import { uploadBookCoverPicture } from '../fn/book/upload-book-cover-picture';
@@ -241,6 +243,39 @@ export class BookService extends BaseService {
   getAllReturnedBooks(params?: GetAllReturnedBooks$Params, context?: HttpContext): Observable<PageResponse> {
     return this.getAllReturnedBooks$Response(params, context).pipe(
       map((r: StrictHttpResponse<PageResponse>): PageResponse => r.body)
+    );
+  }
+
+  /** Path part for operation `updateArchiveStatus()` */
+  static readonly UpdateArchiveStatusPath = '/books/archive/{book-id}';
+
+  /**
+   * updateArchiveStatus.
+   *
+   * Update the archive status of a targeted book
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `updateArchiveStatus()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  updateArchiveStatus$Response(params: UpdateArchiveStatus$Params, context?: HttpContext): Observable<StrictHttpResponse<number>> {
+    return updateArchiveStatus(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * updateArchiveStatus.
+   *
+   * Update the archive status of a targeted book
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `updateArchiveStatus$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  updateArchiveStatus(params: UpdateArchiveStatus$Params, context?: HttpContext): Observable<number> {
+    return this.updateArchiveStatus$Response(params, context).pipe(
+      map((r: StrictHttpResponse<number>): number => r.body)
     );
   }
 
