@@ -36,7 +36,7 @@ export class ManageBookComponent implements OnInit{
     const bookId = this.activatedRoute.snapshot.params['bookId'];
     if(bookId){
       this.bookService.findBookById({
-        'book-id': bookId
+        'book-id': bookId as number
       }).subscribe({
         next: (bookResponse: BookResponse) => {
           this.bookRequest = {
