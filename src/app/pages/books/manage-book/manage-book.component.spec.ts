@@ -180,12 +180,10 @@ describe('ManageBookComponent', () => {
         expect(errorElements[1].nativeElement.textContent).toBe('Error 2');
     });
 
-    /*
-    it('should bind from inputs to bookRequest properties', () => {
-        component.bookRequest = mockBookRequest;
-        fixture.detectChanges();
-        tick(); // tick() ensure ngModel bindings are updated
     
+    it('should bind from inputs to bookRequest properties', async () => {
+        fixture.detectChanges();
+        await fixture.whenStable();
 
         const titleInput = fixture.debugElement.query(By.css('#title')).nativeElement;
         const authorInput = fixture.debugElement.query(By.css('#author_name')).nativeElement;
@@ -193,8 +191,26 @@ describe('ManageBookComponent', () => {
         const synopsisInput = fixture.debugElement.query(By.css('#synopsis')).nativeElement;
         const shareableInput = fixture.debugElement.query(By.css('#shareable')).nativeElement;
 
-        expect(titleInput.value).toBe(mockBookRequest.title);
-    });*/
+        titleInput.value = mockBookRequest.title;
+        titleInput.dispatchEvent(new Event('input'));
+        authorInput.value = mockBookRequest.author_name;
+        authorInput.dispatchEvent(new Event('input'));
+        isbnInput.value = mockBookRequest.isbn;
+        isbnInput.dispatchEvent(new Event('input'));
+        synopsisInput.value = mockBookRequest.synopsis;
+        synopsisInput.dispatchEvent(new Event('input'));
+        shareableInput.value = mockBookRequest.shareable;
+        shareableInput.dispatchEvent(new Event('input'));
+
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(component.bookRequest.title).toBe(mockBookRequest.title);
+        expect(component.bookRequest.author_name).toBe(mockBookRequest.author_name);
+        expect(component.bookRequest.isbn).toBe(mockBookRequest.isbn);
+        expect(component.bookRequest.synopsis).toBe(mockBookRequest.synopsis);
+        expect(component.bookRequest.shareable).toBe(mockBookRequest.shareable);
+    });
 
     it('should call saveBook when save button is clicked', () => {
         spyOn(component, 'saveBook');
