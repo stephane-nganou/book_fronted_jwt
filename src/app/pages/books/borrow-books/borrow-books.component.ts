@@ -64,6 +64,7 @@ export class BorrowBooksComponent implements OnInit {
 
   returnBorrowedBook(book: BorrowedBookResponse) {
     this.selectedBookResponse = book;
+    this.feedbackRequest.book_id = book.id;
   }
 
   goToPage(page: number) {
