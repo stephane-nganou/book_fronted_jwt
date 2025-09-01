@@ -70,11 +70,11 @@ describe('ManageBookComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
+  it('should create ManageBookComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('ngOnInit', () => {
+  describe('ManageBookComponent ngOnInit', () => {
     it('should initialize with empty bookRequest when no bookId is provided', () => {
         fixture.detectChanges();
         expect(component.bookRequest).toEqual({
