@@ -264,5 +264,28 @@ describe('BorrowBooksComponent', () => {
 
         // verify
         expect(component.selectedBookResponse).toBeUndefined();
-    })
-})
+    });
+
+    /* Todo: fix test
+    it('should update feedback request when input changes', fakeAsync(() => {
+        // prepare
+        component.selectedBookResponse = mockBorrowedBookResponse;
+        fixture.detectChanges();
+        const ratingInput = fixture.debugElement.query(By.css('input[type="range"]'));
+        const textarea = fixture.debugElement.query(By.css('textarea'));
+
+        // test
+        ratingInput.nativeElement.value = '4.5';
+        ratingInput.nativeElement.dispatchEvent(new Event('input'));
+        ratingInput.nativeElement.dispatchEvent(new Event('change'));
+        fixture.detectChanges();
+        textarea.nativeElement.value = 'Great book!';
+        textarea.nativeElement.dispatchEvent(new Event('input'));
+        textarea.nativeElement.dispatchEvent(new Event('change'));
+        fixture.detectChanges();
+
+        // verify
+        tick();
+        expect(component.feedbackRequest.comment).toBe('Great book!');
+    })); */
+});
