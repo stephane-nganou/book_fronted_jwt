@@ -78,12 +78,14 @@ describe('BorrowBooksComponent', () => {
         expect(component.borrowedBooksPage).toEqual(mockPageResponse);
     }));
 
-    /*
+    
     it('should display borrowed books in table when no book is selected', () => {
-        const tableRows = fixture.debugElement.queryAll(By.css('tbody tr'));
+        // test
+        const tableRows = fixture.debugElement.queryAll(By.css('table tbody'));
 
+        // verify
         expect(tableRows.length).toBe(1);
-    });*/
+    });
 
     it('should select a book for return when clicking return icon', () => {
         // test
