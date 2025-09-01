@@ -185,7 +185,7 @@ describe('BorrowBooksComponent', () => {
         )
     );
 
-    /*
+    
     it('should disable next page button when on last page', () => {
         // prepare
         component.borrowedBooksPage = { ...mockPageResponse, last: true };
@@ -193,12 +193,12 @@ describe('BorrowBooksComponent', () => {
 
         // test
         fixture.detectChanges();
-        const nextButton = fixture.debugElement.query(By.css('.page-item:last-child .page-link'));
+        const nextButton = fixture.debugElement.query(By.css('.page-item:nth-last-child(2) .page-link'));
 
         // expect
         expect(nextButton.classes['disabled']).toBeTruthy();
     });
-    */
+    
 
     it('should handle error response correctly', 
         fakeAsync(() => {
@@ -216,8 +216,13 @@ describe('BorrowBooksComponent', () => {
             // test
             component.returnBook(true);
             tick();
+            fixture.detectChanges();
 
             // verify
             expect(jsonParserServiceSpy.parseErrorResponse).toHaveBeenCalled();
+            expect(component.errorMsg).toEqual(['Error 1', 'Error 2']);
+            const errorDiv = fixture.debugElement.query(By.css('.alert.alert-danger'));
+            expect(errorDiv).toBeTruthy();
+            expect(errorDiv.queryAll(By.css('p')).length).toBe(2);
         }));
 })
