@@ -39,6 +39,7 @@ describe('BorrowBooksComponent', () => {
     };
 
     beforeEach(async () => {
+        // prepare
         bookServiceSpy = jasmine.createSpyObj('BookService', ['getAllBorrowedBooks', 'returnBorrowBook']);
         jsonParserServiceSpy = jasmine.createSpyObj('JsonParserService', ['parseErrorResponse']);
         feedbackServceSpy = jasmine.createSpyObj('FeedbackService', ['saveFeedback']);
@@ -46,9 +47,9 @@ describe('BorrowBooksComponent', () => {
         await TestBed.configureTestingModule({
             imports: [FormsModule, BorrowBooksComponent, RatingComponent],
             providers: [
-                {provide: BookService, useValue: bookServiceSpy},
-                {provide: JsonParserService, useValue: jsonParserServiceSpy},
-                {provide: FeedbackService, useValue: feedbackServceSpy}
+                { provide: BookService, useValue: bookServiceSpy },
+                { provide: JsonParserService, useValue: jsonParserServiceSpy },
+                { provide: FeedbackService, useValue: feedbackServceSpy }
             ]
         }).compileComponents();
 
@@ -57,6 +58,7 @@ describe('BorrowBooksComponent', () => {
     });
 
     beforeEach(() => {
+        // prepare
         bookServiceSpy.getAllBorrowedBooks.and.returnValue(of(mockPageResponse));
         fixture.detectChanges();
     });
@@ -66,9 +68,12 @@ describe('BorrowBooksComponent', () => {
     });
 
     it('should initialize with borrowed books on ngOnInit', fakeAsync(() => {
+        // test
         component.ngOnInit();
         tick();
-        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
+
+        // verify
+        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({ page: 0, size: 5 });
         expect(component.borrowedBooksPage).toEqual(mockPageResponse);
     }));
 
@@ -80,20 +85,25 @@ describe('BorrowBooksComponent', () => {
     });*/
 
     it('should select a book for return when clicking return icon', () => {
+        // test
         component.returnBorrowedBook(mockBorrowedBookResponse);
+
+        // verify
         expect(component.selectedBookResponse).toEqual(mockBorrowedBookResponse);
         expect(component.feedbackRequest.book_id).toEqual(mockBorrowedBookResponse.id);
     });
 
     it('should display book details and feedback form when a book is selected', () => {
+        // test
         component.selectedBookResponse = mockBorrowedBookResponse;
         fixture.detectChanges();
-
         const bookDetails = fixture.debugElement.query(By.css('.d-flex.flex-column.col-6'));
+
+        // verify
         expect(bookDetails).toBeTruthy();
         expect(bookDetails.query(By.css('.col-11')).nativeElement.textContent).toContain('Test Book');
         expect(bookDetails.nativeElement.textContent).toContain('Test Author');
-        
+
 
         const feedbackForm = fixture.debugElement.query(By.css('form'));
         expect(feedbackForm).toBeTruthy();
@@ -112,7 +122,7 @@ describe('BorrowBooksComponent', () => {
         tick();
 
         // verify
-        expect(bookServiceSpy.returnBorrowBook).toHaveBeenCalledWith({"book-id": mockBorrowedBookResponse.id});
+        expect(bookServiceSpy.returnBorrowBook).toHaveBeenCalledWith({ "book-id": mockBorrowedBookResponse.id });
         expect(component.borrowedBooksPage).toBe(mockPageResponse);
         expect(component.selectedBookResponse).toBeDefined();
         expect(feedbackServceSpy.saveFeedback).not.toHaveBeenCalled();

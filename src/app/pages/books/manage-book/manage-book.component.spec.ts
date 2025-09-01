@@ -17,36 +17,37 @@ describe('ManageBookComponent', () => {
   let routerSpy: jasmine.SpyObj<Router>;
   let activatedRouteSpy: { snapshot: { params: { bookId?: string } } };
 
-  
+
   const mockBookResponse: BookResponse = {
-      id: 1,
-      title: 'Test Book',
-      author_name: 'Test Author',
-      isbn: '1234567890',
-      synopsis: 'Test Synopsis',
-      shareable: true,
-      cover: 'test-cover-base64',
-      archived: false,
-      owner: '',
-      rate: 0
+    id: 1,
+    title: 'Test Book',
+    author_name: 'Test Author',
+    isbn: '1234567890',
+    synopsis: 'Test Synopsis',
+    shareable: true,
+    cover: 'test-cover-base64',
+    archived: false,
+    owner: '',
+    rate: 0
   };
 
   const mockBookRequest: BookRequest = {
-      author_name: 'Test Author',
-      isbn: '1234567890',
-      shareable: false,
-      synopsis: 'Test Synopsis',
-      title: 'Test Book'
+    author_name: 'Test Author',
+    isbn: '1234567890',
+    shareable: false,
+    synopsis: 'Test Synopsis',
+    title: 'Test Book'
   };
-  
+
   const mockApiErrorResponse: ApiErrorResponse = {
-      timestamp: '2025-08-31T18:11:00Z',
-      errorMessage: 'Test error',
-      validationErrors: ['Validation error 1', 'Validation error 2'],
-      details: ''
+    timestamp: '2025-08-31T18:11:00Z',
+    errorMessage: 'Test error',
+    validationErrors: ['Validation error 1', 'Validation error 2'],
+    details: ''
   };
 
   beforeEach(async () => {
+    // prepare
     bookServiceSpy = jasmine.createSpyObj('BookService', ['findBookById', 'saveBook', 'uploadBookCoverPicture']);
     jsonParserServiceSpy = jasmine.createSpyObj('JsonParserService', ['parseErrorResponse']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
@@ -76,37 +77,42 @@ describe('ManageBookComponent', () => {
 
   describe('ManageBookComponent ngOnInit', () => {
     it('should initialize with empty bookRequest when no bookId is provided', () => {
-        fixture.detectChanges();
-        expect(component.bookRequest).toEqual({
-            author_name: '',
-            isbn: '',
-            shareable: false,
-            synopsis: '',
-            title: ''
-        });
-        expect(bookServiceSpy.findBookById).not.toHaveBeenCalled();
+      // test
+      fixture.detectChanges();
+
+      // verify
+      expect(component.bookRequest).toEqual({
+        author_name: '',
+        isbn: '',
+        shareable: false,
+        synopsis: '',
+        title: ''
+      });
+      expect(bookServiceSpy.findBookById).not.toHaveBeenCalled();
     });
 
     it('should load book data when bookId is provided', () => {
-        activatedRouteSpy.snapshot.params = {bookId: '1'};
-        bookServiceSpy.findBookById.and.returnValue(of(mockBookResponse));
-        fixture.detectChanges();
+      // prepare
+      activatedRouteSpy.snapshot.params = { bookId: '1' };
+      bookServiceSpy.findBookById.and.returnValue(of(mockBookResponse));
+      fixture.detectChanges();
 
-        //expect(bookServiceSpy.findBookById).toHaveBeenCalledWith({'book-id': 1});
-        expect(component.bookRequest).toEqual({
-            id: mockBookResponse.id,
-            title: mockBookResponse.title,
-            author_name: mockBookResponse.author_name,
-            isbn: mockBookResponse.isbn,
-            synopsis: mockBookResponse.synopsis,
-            shareable: mockBookResponse.shareable,
-        });
-        expect(component.selectedPicture).toBe(`data:image/jpg;base64,${mockBookResponse.cover}`);
+      //expect(bookServiceSpy.findBookById).toHaveBeenCalledWith({'book-id': 1});
+      expect(component.bookRequest).toEqual({
+        id: mockBookResponse.id,
+        title: mockBookResponse.title,
+        author_name: mockBookResponse.author_name,
+        isbn: mockBookResponse.isbn,
+        synopsis: mockBookResponse.synopsis,
+        shareable: mockBookResponse.shareable,
+      });
+      expect(component.selectedPicture).toBe(`data:image/jpg;base64,${mockBookResponse.cover}`);
     });
   });
 
   describe('onFileSelected', () => {
     it('should set selectedBookCover and selectedPicture when file is selected', () => {
+      // prepare
       const file = new File([''], 'test.jpg', { type: 'image/jpeg' });
       const event = { target: { files: [file] } };
       const readerResult = 'data:image/jpeg;base64,test-data';
@@ -122,8 +128,10 @@ describe('ManageBookComponent', () => {
       };
       spyOn(window, 'FileReader').and.returnValue(mockFileReader as any);
 
+      // test
       component.onFileSelected(event);
 
+      // verify
       expect(component.selectedBookCover).toBe(file);
       expect(window.FileReader).toHaveBeenCalled();
       expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(file);
@@ -131,101 +139,121 @@ describe('ManageBookComponent', () => {
     });
 
     it('should not set selectedPicture when no file is selected', () => {
-        const event = {target: {files: []}};
-        component.onFileSelected(event);
-        expect(component.selectedBookCover).toBeUndefined();
-        expect(component.selectedPicture).toBeUndefined();
+      // prepare
+      const event = { target: { files: [] } };
+
+      // test
+      component.onFileSelected(event);
+
+      // verify
+      expect(component.selectedBookCover).toBeUndefined();
+      expect(component.selectedPicture).toBeUndefined();
     });
 
   });
 
   describe('saveBook', () => {
     it('should save book and upload cover picture when successful', () => {
-        bookServiceSpy.saveBook.and.returnValue(of(1));
-        bookServiceSpy.uploadBookCoverPicture.and.returnValue(of());
-        component.selectedBookCover = new File([''], 'test.jpg');
-        component.bookRequest = mockBookRequest;
+      // prepare
+      bookServiceSpy.saveBook.and.returnValue(of(1));
+      bookServiceSpy.uploadBookCoverPicture.and.returnValue(of());
+      component.selectedBookCover = new File([''], 'test.jpg');
+      component.bookRequest = mockBookRequest;
 
-        component.saveBook();
+      // test
+      component.saveBook();
 
-        expect(bookServiceSpy.saveBook).toHaveBeenCalledWith({body: component.bookRequest});
-        expect(bookServiceSpy.uploadBookCoverPicture).toHaveBeenCalledWith({
-            'book-id': 1,
-            body: {file: component.selectedBookCover}
-        });
-        expect(component.errorMsg).toEqual([]);
+      // verify
+      expect(bookServiceSpy.saveBook).toHaveBeenCalledWith({ body: component.bookRequest });
+      expect(bookServiceSpy.uploadBookCoverPicture).toHaveBeenCalledWith({
+        'book-id': 1,
+        body: { file: component.selectedBookCover }
+      });
+      expect(component.errorMsg).toEqual([]);
     });
 
     it('should handle save book error with validation errors', () => {
-        bookServiceSpy.saveBook.and.returnValue(throwError(() => ({
-            error: mockApiErrorResponse
-        })));
-        jsonParserServiceSpy.parseErrorResponse.and.returnValue(mockApiErrorResponse);
+      // prepare
+      bookServiceSpy.saveBook.and.returnValue(throwError(() => ({
+        error: mockApiErrorResponse
+      })));
+      jsonParserServiceSpy.parseErrorResponse.and.returnValue(mockApiErrorResponse);
 
-        component.saveBook();
+      // test
+      component.saveBook();
 
-        expect(bookServiceSpy.saveBook).toHaveBeenCalled();
-        expect(component.errorMsg).toEqual(mockApiErrorResponse.validationErrors);
+      // verify
+      expect(bookServiceSpy.saveBook).toHaveBeenCalled();
+      expect(component.errorMsg).toEqual(mockApiErrorResponse.validationErrors);
     });
   });
 
   describe('template', () => {
     it('should display error messages when errorMsg is not empty', () => {
-        component.errorMsg = ['Error 1', 'Error 2'];
-        fixture.detectChanges();
+      // test
+      component.errorMsg = ['Error 1', 'Error 2'];
 
-        const errorElements = fixture.debugElement.queryAll(By.css('.alert-danger p'));
-        expect(errorElements.length).toBe(2);
-        expect(errorElements[0].nativeElement.textContent).toBe('Error 1');
-        expect(errorElements[1].nativeElement.textContent).toBe('Error 2');
+      fixture.detectChanges();
+      const errorElements = fixture.debugElement.queryAll(By.css('.alert-danger p'));
+
+      // verify
+      expect(errorElements.length).toBe(2);
+      expect(errorElements[0].nativeElement.textContent).toBe('Error 1');
+      expect(errorElements[1].nativeElement.textContent).toBe('Error 2');
     });
 
-    
+
     it('should bind from inputs to bookRequest properties', async () => {
-        fixture.detectChanges();
-        await fixture.whenStable();
+      // prepare
+      fixture.detectChanges();
+      await fixture.whenStable();
 
-        const titleInput = fixture.debugElement.query(By.css('#title')).nativeElement;
-        const authorInput = fixture.debugElement.query(By.css('#author_name')).nativeElement;
-        const isbnInput = fixture.debugElement.query(By.css('#isbn')).nativeElement;
-        const synopsisInput = fixture.debugElement.query(By.css('#synopsis')).nativeElement;
-        const shareableInput = fixture.debugElement.query(By.css('#shareable')).nativeElement;
+      const titleInput = fixture.debugElement.query(By.css('#title')).nativeElement;
+      const authorInput = fixture.debugElement.query(By.css('#author_name')).nativeElement;
+      const isbnInput = fixture.debugElement.query(By.css('#isbn')).nativeElement;
+      const synopsisInput = fixture.debugElement.query(By.css('#synopsis')).nativeElement;
+      const shareableInput = fixture.debugElement.query(By.css('#shareable')).nativeElement;
 
-        titleInput.value = mockBookRequest.title;
-        titleInput.dispatchEvent(new Event('input'));
-        authorInput.value = mockBookRequest.author_name;
-        authorInput.dispatchEvent(new Event('input'));
-        isbnInput.value = mockBookRequest.isbn;
-        isbnInput.dispatchEvent(new Event('input'));
-        synopsisInput.value = mockBookRequest.synopsis;
-        synopsisInput.dispatchEvent(new Event('input'));
-        shareableInput.value = mockBookRequest.shareable;
-        shareableInput.dispatchEvent(new Event('input'));
+      titleInput.value = mockBookRequest.title;
+      titleInput.dispatchEvent(new Event('input'));
+      authorInput.value = mockBookRequest.author_name;
+      authorInput.dispatchEvent(new Event('input'));
+      isbnInput.value = mockBookRequest.isbn;
+      isbnInput.dispatchEvent(new Event('input'));
+      synopsisInput.value = mockBookRequest.synopsis;
+      synopsisInput.dispatchEvent(new Event('input'));
+      shareableInput.value = mockBookRequest.shareable;
+      shareableInput.dispatchEvent(new Event('input'));
 
-        fixture.detectChanges();
-        await fixture.whenStable();
+      // test
+      fixture.detectChanges();
+      await fixture.whenStable();
 
-        expect(component.bookRequest.title).toBe(mockBookRequest.title);
-        expect(component.bookRequest.author_name).toBe(mockBookRequest.author_name);
-        expect(component.bookRequest.isbn).toBe(mockBookRequest.isbn);
-        expect(component.bookRequest.synopsis).toBe(mockBookRequest.synopsis);
-        expect(component.bookRequest.shareable).toBe(mockBookRequest.shareable);
+      // verify
+      expect(component.bookRequest.title).toBe(mockBookRequest.title);
+      expect(component.bookRequest.author_name).toBe(mockBookRequest.author_name);
+      expect(component.bookRequest.isbn).toBe(mockBookRequest.isbn);
+      expect(component.bookRequest.synopsis).toBe(mockBookRequest.synopsis);
+      expect(component.bookRequest.shareable).toBe(mockBookRequest.shareable);
     });
 
     it('should call saveBook when save button is clicked', () => {
-        spyOn(component, 'saveBook');
-        fixture.detectChanges();
+      // prepare
+      spyOn(component, 'saveBook');
+      fixture.detectChanges();
+      const saveButton = fixture.debugElement.query(By.css('.btn-outline-primary')).nativeElement;
 
-        const saveButton = fixture.debugElement.query(By.css('.btn-outline-primary')).nativeElement;
-        saveButton.click();
+      // test
+      saveButton.click();
 
-        expect(component.saveBook).toHaveBeenCalled();
+      // verify
+      expect(component.saveBook).toHaveBeenCalled();
     });
   });
 
-  
 
 
 
-  
+
+
 });
