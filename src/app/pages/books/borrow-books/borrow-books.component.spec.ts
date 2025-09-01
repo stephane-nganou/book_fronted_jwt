@@ -149,6 +149,36 @@ describe('BorrowBooksComponent', () => {
             expect(bookServiceSpy.returnBorrowBook).toHaveBeenCalledWith({"book-id": mockBorrowedBookResponse.id});
             expect(feedbackServceSpy.saveFeedback).toHaveBeenCalled();
             expect(component.selectedBookResponse).toBeUndefined();
+            expect(component.selectedBookResponse).toBeUndefined();
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
         })
     );
+
+    it('should handle pagination correctly', fakeAsync(() => {
+        component.goToNextPage();
+        tick();
+        expect(component.page).toBe(1);
+        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 1, size: 5});
+
+        component.goToPreviousPage();
+        tick();
+        expect(component.page).toBe(0);
+        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
+
+        component.goToLastPage();
+        tick();
+        expect(component.page).toBe(0);
+        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
+
+        component.goToFirstPage();
+        tick();
+        expect(component.page).toBe(0);
+        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
+
+        component.goToPage(2);
+        tick();
+        expect(component.page).toBe(2);
+        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 2, size: 5});
+
+    }));
 })
