@@ -8,6 +8,7 @@ import { RatingComponent } from "../rating/rating.component";
 import { FormsModule } from "@angular/forms";
 import { of } from "rxjs";
 import { By } from "@angular/platform-browser";
+import { saveFeedback } from "../../../services/fn/feedback/save-feedback";
 
 
 
@@ -126,6 +127,28 @@ describe('BorrowBooksComponent', () => {
         expect(component.borrowedBooksPage).toBe(mockPageResponse);
         expect(component.selectedBookResponse).toBeDefined();
         expect(feedbackServceSpy.saveFeedback).not.toHaveBeenCalled();
-
     }));
+
+    it('should call returnBook and saveFeedback services when returning a book with feedback',
+        fakeAsync(() => {
+            // prepare
+            component.selectedBookResponse = mockBorrowedBookResponse;
+            component.feedbackRequest = {
+                book_id: mockBorrowedBookResponse.id,
+                comment: 'Great Book',
+                note: 4
+            };
+            bookServiceSpy.returnBorrowBook.and.returnValue(of(mockBorrowedBookResponse.id));
+            feedbackServceSpy.saveFeedback.and.returnValue(of());
+
+            // test
+            component.returnBook(true);
+            tick();
+
+            // verify
+            expect(bookServiceSpy.returnBorrowBook).toHaveBeenCalledWith({"book-id": mockBorrowedBookResponse.id});
+            expect(feedbackServceSpy.saveFeedback).toHaveBeenCalled();
+            expect(component.selectedBookResponse).toBeUndefined();
+        })
+    );
 })
