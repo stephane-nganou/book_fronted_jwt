@@ -250,5 +250,19 @@ describe('BorrowBooksComponent', () => {
             // verify
             expect(component.errorMsg).toEqual(['Server error']);
         })
-    )
+    );
+
+    it('should cancel book selection', () => {
+        // prepare
+        component.selectedBookResponse = mockBorrowedBookResponse;
+        component.feedbackRequest = {book_id: mockBorrowedBookResponse.id, comment: 'Test', note: 3};
+        fixture.detectChanges();
+
+        // test
+        const cancelButton = fixture.debugElement.query(By.css('.btn.btn-link.text-danger')).nativeElement;
+        cancelButton.click();
+
+        // verify
+        expect(component.selectedBookResponse).toBeUndefined();
+    })
 })
