@@ -226,5 +226,29 @@ describe('BorrowBooksComponent', () => {
             const errorDiv = fixture.debugElement.query(By.css('.alert.alert-danger'));
             expect(errorDiv).toBeTruthy();
             expect(errorDiv.queryAll(By.css('p')).length).toBe(2);
-        }));
+        })
+    );
+
+    it('should handle generic error when no validation errors', 
+        fakeAsync(() => {
+            // prepare
+            const errorResponse: ApiErrorResponse = {
+                timestamp: '',
+                errorMessage: 'Server error',
+                validationErrors: [],
+                details: ''
+            };
+            jsonParserServiceSpy.parseErrorResponse.and.returnValue(errorResponse);
+            bookServiceSpy.returnBorrowBook.and.returnValue(throwError(() => ({error: errorResponse})));
+            component.selectedBookResponse = mockBorrowedBookResponse;
+
+            // test
+            component.returnBook(true);
+            tick();
+            fixture.detectChanges();
+
+            // verify
+            expect(component.errorMsg).toEqual(['Server error']);
+        })
+    )
 })
