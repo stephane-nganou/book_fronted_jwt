@@ -7,6 +7,7 @@ import { PageBorrowedBookResponse } from "../../../services/models/page-borrowed
 import { RatingComponent } from "../rating/rating.component";
 import { FormsModule } from "@angular/forms";
 import { of } from "rxjs";
+import { By } from "@angular/platform-browser";
 
 
 
@@ -70,4 +71,34 @@ describe('BorrowBooksComponent', () => {
         expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
         expect(component.borrowedBooksPage).toEqual(mockPageResponse);
     }));
+
+    /*
+    it('should display borrowed books in table when no book is selected', () => {
+        const tableRows = fixture.debugElement.queryAll(By.css('tbody tr'));
+
+        expect(tableRows.length).toBe(1);
+    });*/
+
+    it('should select a book for return when clicking return icon', () => {
+        component.returnBorrowedBook(mockBorrowedBookResponse);
+        expect(component.selectedBookResponse).toEqual(mockBorrowedBookResponse);
+        expect(component.feedbackRequest.book_id).toEqual(mockBorrowedBookResponse.id);
+    });
+
+    it('should display book details and feedback form when a book is selected', () => {
+        component.selectedBookResponse = mockBorrowedBookResponse;
+        fixture.detectChanges();
+
+        const bookDetails = fixture.debugElement.query(By.css('.d-flex.flex-column.col-6'));
+        expect(bookDetails).toBeTruthy();
+        expect(bookDetails.query(By.css('.col-11')).nativeElement.textContent).toContain('Test Book');
+        expect(bookDetails.nativeElement.textContent).toContain('Test Author');
+        
+
+        const feedbackForm = fixture.debugElement.query(By.css('form'));
+        expect(feedbackForm).toBeTruthy();
+
+        const table = fixture.debugElement.query(By.css('table'));
+        expect(table).toBeDefined();
+    });
 })
