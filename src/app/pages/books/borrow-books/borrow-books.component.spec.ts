@@ -101,4 +101,21 @@ describe('BorrowBooksComponent', () => {
         const table = fixture.debugElement.query(By.css('table'));
         expect(table).toBeDefined();
     });
+
+    it('should call returnBook service when returning a book without feedback', fakeAsync(() => {
+        // prepare
+        component.selectedBookResponse = mockBorrowedBookResponse;
+        bookServiceSpy.returnBorrowBook.and.returnValue(of());
+
+        // test
+        component.returnBook(false);
+        tick();
+
+        // verify
+        expect(bookServiceSpy.returnBorrowBook).toHaveBeenCalledWith({"book-id": mockBorrowedBookResponse.id});
+        expect(component.borrowedBooksPage).toBe(mockPageResponse);
+        expect(component.selectedBookResponse).toBeDefined();
+        expect(feedbackServceSpy.saveFeedback).not.toHaveBeenCalled();
+
+    }));
 })
