@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { BorrowBooksComponent } from "./borrow-books.component"
 import { BookService, FeedbackService } from "../../../services/services";
 import { JsonParserService } from "../../../services/json-parser.service";
@@ -63,4 +63,11 @@ describe('BorrowBooksComponent', () => {
     it('should create the component BorrowBooksComponent', () => {
         expect(component).toBeTruthy();
     });
+
+    it('should initialize with borrowed books on ngOnInit', fakeAsync(() => {
+        component.ngOnInit();
+        tick();
+        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
+        expect(component.borrowedBooksPage).toEqual(mockPageResponse);
+    }));
 })
