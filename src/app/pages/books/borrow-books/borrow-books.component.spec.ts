@@ -6,9 +6,9 @@ import { BorrowedBookResponse } from "../../../services/models/borrowed-book-res
 import { PageBorrowedBookResponse } from "../../../services/models/page-borrowed-book-response";
 import { RatingComponent } from "../rating/rating.component";
 import { FormsModule } from "@angular/forms";
-import { of } from "rxjs";
+import { of, throwError } from "rxjs";
 import { By } from "@angular/platform-browser";
-import { saveFeedback } from "../../../services/fn/feedback/save-feedback";
+import { ApiErrorResponse } from "../../../services/models/api-error-response";
 
 
 
@@ -154,31 +154,70 @@ describe('BorrowBooksComponent', () => {
         })
     );
 
-    it('should handle pagination correctly', fakeAsync(() => {
-        component.goToNextPage();
-        tick();
-        expect(component.page).toBe(1);
-        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 1, size: 5});
+    it('should handle pagination correctly',
+        fakeAsync(() => {
+            component.goToNextPage();
+            tick();
+            expect(component.page).toBe(1);
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 1, size: 5});
 
-        component.goToPreviousPage();
-        tick();
-        expect(component.page).toBe(0);
-        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
+            component.goToPreviousPage();
+            tick();
+            expect(component.page).toBe(0);
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
 
-        component.goToLastPage();
-        tick();
-        expect(component.page).toBe(0);
-        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
+            component.goToLastPage();
+            tick();
+            expect(component.page).toBe(0);
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
 
-        component.goToFirstPage();
-        tick();
-        expect(component.page).toBe(0);
-        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
+            component.goToFirstPage();
+            tick();
+            expect(component.page).toBe(0);
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
 
-        component.goToPage(2);
-        tick();
-        expect(component.page).toBe(2);
-        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 2, size: 5});
+            component.goToPage(2);
+            tick();
+            expect(component.page).toBe(2);
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 2, size: 5});
 
-    }));
+        }
+        )
+    );
+
+    /*
+    it('should disable next page button when on last page', () => {
+        // prepare
+        component.borrowedBooksPage = { ...mockPageResponse, last: true };
+        component.page = 0;
+
+        // test
+        fixture.detectChanges();
+        const nextButton = fixture.debugElement.query(By.css('.page-item:last-child .page-link'));
+
+        // expect
+        expect(nextButton.classes['disabled']).toBeTruthy();
+    });
+    */
+
+    it('should handle error response correctly', 
+        fakeAsync(() => {
+            // prepare
+            const errorResponse: ApiErrorResponse = {
+                timestamp: new Date().toISOString(),
+                validationErrors: ['Error 1', 'Error 2'],
+                errorMessage: 'Validation failed',
+                details: 'Validation error'
+            };
+            jsonParserServiceSpy.parseErrorResponse.and.returnValue(errorResponse);
+            bookServiceSpy.returnBorrowBook.and.returnValue(throwError(() => ({error: errorResponse})));
+            component.selectedBookResponse = mockBorrowedBookResponse;
+
+            // test
+            component.returnBook(true);
+            tick();
+
+            // verify
+            expect(jsonParserServiceSpy.parseErrorResponse).toHaveBeenCalled();
+        }));
 })
