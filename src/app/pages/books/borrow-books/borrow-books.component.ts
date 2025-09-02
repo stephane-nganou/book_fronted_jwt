@@ -122,18 +122,20 @@ export class BorrowBooksComponent implements OnInit {
   }
 
   private handleError(error: any) {
-    //
-    const parsedError: ApiErrorResponse = this.errorParserService.parseErrorResponse(error.error);
-    if (null === parsedError.timestamp) {
+    
+    console.log(error);
+    const parsedError = this.errorParserService.parseErrorResponse(error.error);
+    if (undefined === parsedError.timestamp) {
       this.errorMsg.push('Something went wrong');
       return;
     }
     if (parsedError.validationErrors && parsedError.validationErrors.length > 0) {
       this.errorMsg = parsedError.validationErrors;
+      return;
     } else {
       this.errorMsg.push(parsedError.errorMessage);
+      return;
     }
-    console.log(error);
   }
   
   
