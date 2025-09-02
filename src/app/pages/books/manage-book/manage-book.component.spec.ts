@@ -117,8 +117,8 @@ describe('ManageBookComponent', () => {
       const event = { target: { files: [file] } };
       const readerResult = 'data:image/jpeg;base64,test-data';
       const mockFileReader = {
-        result: null as string | null,
-        onload: null as (() => void) | null,
+        result: undefined as string | undefined,
+        onload: undefined as (() => void) | undefined,
         readAsDataURL: jasmine.createSpy('readAsDataURL').and.callFake(() => {
           mockFileReader.result = readerResult;
           if (mockFileReader.onload) {

@@ -49,7 +49,7 @@ export class LoginComponent {
   private handleError(error: any) {
       const parsedError: ApiErrorResponse =
         this.errorParserService.parseErrorResponse(error.error);
-      if (null === parsedError.timestamp) {
+      if (undefined === parsedError.timestamp) {
         this.errorMsg.push('Something went wrong');
         return;
       }
