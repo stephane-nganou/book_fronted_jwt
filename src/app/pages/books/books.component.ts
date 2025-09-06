@@ -5,8 +5,7 @@ import { BookResponse, PageResponse } from '../../services/models';
 import { NgFor } from '@angular/common';
 import { PageBookResponse } from '../../services/models/page-book-response';
 import { BookCardComponent } from './book-card/book-card.component';
-import { JsonParserService } from '../../services/json-parser.service';
-import { ApiErrorResponse } from '../../services/models/api-error-response';
+import { DefaulErrorHandlerService } from '../../services/error/default-error-handler.service';
 
 @Component({
   selector: 'app-books',
@@ -18,7 +17,7 @@ export class BooksComponent implements OnInit {
 
   page: number = 0;
   size: number = 10;
-  message: string = '';
+  message: Array<string> = [];
   level: string = 'success';
 
   bookResponse?: PageBookResponse;
@@ -26,7 +25,7 @@ export class BooksComponent implements OnInit {
 
   constructor(
     private bookService: BookService,
-    private errorParserService: JsonParserService,
+    private errorHandlerService: DefaulErrorHandlerService,
     private router: Router) {}
 
   ngOnInit(): void {
@@ -34,17 +33,17 @@ export class BooksComponent implements OnInit {
   }
 
   borrowBook(book: BookResponse) {
-    this.message = '';
+    this.message = [];
     this.bookService.borrowBook({
       "book-id": book.id as number
     }).subscribe({
       next: (bookId) => {
         this.level = 'success';
-        this.message = `Book nr: ${bookId} successfully borrowed`;
+        this.message.push(`Book nr: ${bookId} successfully borrowed`);
       },
       error: (error) => {
         this.level = 'error';
-        this.handleError(error);
+        this.message = this.errorHandlerService.handleError(error);
         },
     })
   }
@@ -91,15 +90,9 @@ export class BooksComponent implements OnInit {
         },
         error: (error) => {
           this.level = 'error';
-          this.handleError(error);
+          this.message = this.errorHandlerService.handleError(error);
         }
       });
-  }
-
-  private handleError(error: any) {
-    const parsedError: ApiErrorResponse = this.errorParserService.parseErrorResponse(error.error);
-    this.message = parsedError.errorMessage;
-    console.log(error);
   }
 
 }
