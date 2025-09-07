@@ -79,8 +79,12 @@ export class BooksComponent implements OnInit {
     this.findAllBooks();
   }
 
-  get isLastPage(): boolean {
-    return this.page === this.bookResponse?.total_pages as number - 1;
+  isLastPage(): boolean {
+    if (this.bookResponse === undefined || this.bookResponse === null) {
+      return true;
+    } else {
+      return this.page === this.bookResponse?.total_pages as number - 1;
+    }
   }
 
   private findAllBooks() {
