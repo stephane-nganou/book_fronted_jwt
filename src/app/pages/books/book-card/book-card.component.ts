@@ -3,6 +3,13 @@ import { BookResponse } from '../../../services/models';
 import { NgIf } from '@angular/common';
 import { RatingComponent } from "../rating/rating.component";
 
+/**
+ * @fileoverview BookCardComponent, purpose of displaying book elements as Cards
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
+
 @Component({
   selector: 'app-book-card',
   imports: [NgIf, RatingComponent],

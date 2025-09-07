@@ -9,6 +9,13 @@ import { FeedbackRequest, PageResponse } from '../../../services/models';
 import { FormsModule } from "@angular/forms";
 import { RatingComponent } from "../rating/rating.component";
 
+/**
+ * @fileoverview BorrowBooksComponent, purpose of displaying book that
+ *  have been borrowed by the authenticated user
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
 @Component({
   selector: 'app-borrow-books',
   imports: [NgIf, NgFor, FormsModule, RatingComponent],

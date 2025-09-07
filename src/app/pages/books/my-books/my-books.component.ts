@@ -8,6 +8,12 @@ import { ApiErrorResponse } from '../../../services/models/api-error-response';
 import { BookCardComponent } from "../book-card/book-card.component";
 import { NgFor } from '@angular/common';
 
+/**
+ * @fileoverview MyBooksComponent, purpose of displaying own published books
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
 @Component({
   selector: 'app-my-books',
   imports: [BookCardComponent, NgFor],

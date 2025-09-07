@@ -5,6 +5,14 @@ import { AuthenticationService } from '../../services/services';
 import { NgIf } from '@angular/common';
 import { JsonParserService } from '../../services/json-parser.service';
 import { ApiErrorResponse } from '../../services/models/api-error-response';
+
+
+/**
+ * @fileoverview ActivateAccountComponent, purpose of enabling user account
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
 @Component({
   selector: 'app-activate-account',
   imports: [NgIf, FormsModule],

@@ -2,6 +2,12 @@ import { NgFor } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 
+/**
+ * @fileoverview RatingComponent, purpose of displaying the rating of books.
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
 @Component({
   selector: 'app-rating',
   imports: [NgFor],

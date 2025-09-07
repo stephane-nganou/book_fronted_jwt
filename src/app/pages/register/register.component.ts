@@ -6,6 +6,12 @@ import { AuthenticationService } from '../../services/services';
 import { JsonParserService } from '../../services/json-parser.service';
 import { ApiErrorResponse } from '../../services/models/api-error-response';
 
+/**
+ * @fileoverview RegisterComponent, purpose of redering a page enabling a new user to register.
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
 @Component({
   selector: 'app-register',
   imports: [FormsModule],

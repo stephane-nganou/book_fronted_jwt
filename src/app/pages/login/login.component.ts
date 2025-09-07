@@ -7,6 +7,13 @@ import { TokenService } from '../../services/token/token.service';
 import { ApiErrorResponse } from '../../services/models/api-error-response';
 import { JsonParserService } from '../../services/json-parser.service';
 
+/**
+ * @fileoverview LoginComponent, purpose of Log in users to get valid token for accessing
+ *  the rest of the api
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
 @Component({
   selector: 'app-login',
   imports: [FormsModule],

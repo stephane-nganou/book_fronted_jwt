@@ -6,6 +6,14 @@ import { BookService } from '../../../services/services';
 import { JsonParserService } from '../../../services/json-parser.service';
 import { ApiErrorResponse } from '../../../services/models/api-error-response';
 
+
+/**
+ * @fileoverview ManageBookComponent, purpose of editing books and 
+ *  adding new one
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
 @Component({
   selector: 'app-manage-book',
   imports: [FormsModule],

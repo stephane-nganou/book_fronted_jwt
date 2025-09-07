@@ -7,6 +7,12 @@ import { PageBookResponse } from '../../services/models/page-book-response';
 import { BookCardComponent } from './book-card/book-card.component';
 import { DefaulErrorHandlerService } from '../../services/error/default-error-handler.service';
 
+/**
+ * @fileoverview BooksComponent, purpose of managing the whole books structure
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
 @Component({
   selector: 'app-books',
   imports: [NgFor, BookCardComponent],

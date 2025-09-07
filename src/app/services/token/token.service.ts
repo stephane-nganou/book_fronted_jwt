@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
 
+/**
+ * @fileoverview TokenService, purpose of managing tokens
+ * @author Stephane Nganou <stephane.nganou.w@snganou.de>
+ * @version 1.0.0
+ * @date 2025-09-07
+ */
 @Injectable({
   providedIn: 'root'
 })
