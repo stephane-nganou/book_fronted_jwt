@@ -7,16 +7,29 @@ import { BooksComponent } from './pages/books/books.component';
 import { MyBooksComponent } from './pages/books/my-books/my-books.component';
 import { ManageBookComponent } from './pages/books/manage-book/manage-book.component';
 import { BorrowBooksComponent } from './pages/books/borrow-books/borrow-books.component';
+import { AuthGuard } from './services/guard/auth-guard';
+
 
 export const routes: Routes = [
-    {path: '', component: BooksComponent, title: 'Books-Store'},
-    {path: 'books', component: BooksComponent, title: 'Books-Store'},
-    {path: 'books/borrow-books', component: BorrowBooksComponent, title: 'My borrowed books'},
-    {path: 'books/my-books', component: MyBooksComponent, title: 'My Books'},
-    {path: 'books/manage', component: ManageBookComponent, title: 'Manage Books'},
-    {path: 'books/manage/:bookId', component: ManageBookComponent, title: 'Manage Book'},
-    {path: 'activate-account', component: ActivateAccountComponent, title: 'Activattion page'},
-    {path: 'login', component: LoginComponent, title: 'Login page'},
-    {path: 'register', component: RegisterComponent, title: 'Register page'},
+
+    { path: 'login', component: LoginComponent, title: 'Login page' },
+    { path: 'register', component: RegisterComponent, title: 'Register page' },
+    { path: 'activate-account', component: ActivateAccountComponent, title: 'Activattion page' },
+
+    {
+        path: 'books',
+        component: BooksComponent,
+        canActivate: [AuthGuard],
+        data: { roles: ['ROLE_USER'] },
+        children: [
+            { path: '', redirectTo: 'books', pathMatch: 'full', title: 'Books-Store' },
+            { path: 'borrow-books', component: BorrowBooksComponent, title: 'My borrowed books' },
+            { path: 'my-books', component: MyBooksComponent, title: 'My Books' },
+            { path: 'manage', component: ManageBookComponent, title: 'Manage Books' },
+            { path: 'bomanage/:bookId', component: ManageBookComponent, title: 'Manage Book' }
+        ]
+    },
+
     {path: '**', component: NotfoundComponent, title: 'PAGE NOT FOUND'}
+    
 ];

@@ -14,4 +14,9 @@ export class TokenService {
   get token() {
     return localStorage.getItem('token') as string;
   }
+
+  isAuthenticated(): boolean {
+    return this.token !== null;
+  }
+
 }
