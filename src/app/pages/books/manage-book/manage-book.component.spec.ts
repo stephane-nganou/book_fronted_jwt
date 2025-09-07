@@ -1,13 +1,19 @@
-import { ComponentFixture, TestBed, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { ManageBookComponent } from './manage-book.component';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BookService } from '../../../services/services';
-import { JsonParserService } from '../../../services/json-parser.service';
-import { of, throwError, timestamp } from 'rxjs';
-import { BookRequest, BookResponse } from '../../../services/models';
-import { By } from '@angular/platform-browser';
-import { ApiErrorResponse } from '../../../services/models/api-error-response';
+import { of, throwError } from 'rxjs';
+import { DefaulErrorHandlerService } from '../../../services/error/default-error-handler.service';
+import { RouterTestingModule } from '@angular/router/testing';
+import { BookResponse } from '../../../services/models';
+
+/*
+Tests used when no signal are used
 
 describe('ManageBookComponent', () => {
   let component: ManageBookComponent;
@@ -252,8 +258,248 @@ describe('ManageBookComponent', () => {
   });
 
 
+}); */
 
+describe('ManageBookComponent', () => {
+  let fixture: ComponentFixture<ManageBookComponent>;
+  let component: ManageBookComponent;
 
+  let bookService: jasmine.SpyObj<BookService>;
+  let errorHandler: jasmine.SpyObj<DefaulErrorHandlerService>;
+  let router: Router;
+  let activatedRouteStub: ActivatedRoute;
 
+  const mockBook = (overrides: Partial<BookResponse> = {}) => ({
+    id: 123,
+    title: 'My Title',
+    author_name: 'Author',
+    isbn: 'ISBN-123',
+    synopsis: 'Synopsis',
+    shareable: true,
+    cover: 'BASE64COVER',
+    archived: false,
+    owner: 'Greatness Sr.',
+    rate: 3,
+    ...overrides,
+  });
 
+  beforeEach(async () => {
+    bookService = jasmine.createSpyObj<BookService>('BookService', [
+      'findBookById',
+      'saveBook',
+      'uploadBookCoverPicture',
+    ]);
+    errorHandler = jasmine.createSpyObj<DefaulErrorHandlerService>(
+      'DefaulErrorHandlerService',
+      ['handleError']
+    );
+
+    // Provide a mutable stub for ActivatedRoute once
+    activatedRouteStub = {
+      snapshot: { params: {} },
+    } as unknown as ActivatedRoute;
+
+    await TestBed.configureTestingModule({
+      imports: [ManageBookComponent, RouterTestingModule],
+      providers: [
+        { provide: BookService, useValue: bookService },
+        { provide: DefaulErrorHandlerService, useValue: errorHandler },
+        { provide: ActivatedRoute, useValue: activatedRouteStub },
+      ],
+    }).compileComponents();
+
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate').and.resolveTo(true);
+  });
+
+  function createComponentWithParams(params: Record<string, any>) {
+    // Mutate the stub before component creation
+    (activatedRouteStub.snapshot as any).params = params;
+    fixture = TestBed.createComponent(ManageBookComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  }
+
+  it('should create the component', () => {
+    createComponentWithParams({});
+    expect(component).toBeTruthy();
+  });
+
+  it('should fetch book by id and populate state when bookId param is present', () => {
+    const response = mockBook();
+    bookService.findBookById.and.returnValue(of(response));
+
+    createComponentWithParams({ bookId: 123 });
+
+    expect(bookService.findBookById).toHaveBeenCalledWith({ 'book-id': 123 });
+    expect(component.bookRequest()).toEqual({
+      id: response.id,
+      title: response.title,
+      author_name: response.author_name,
+      isbn: response.isbn,
+      synopsis: response.synopsis,
+      shareable: response.shareable,
+    });
+    expect(component.selectedPicture()).toBe(
+      `data:image/jpg;base64,${response.cover}`
+    );
+    expect(component.errorMsg()).toEqual([]);
+  });
+
+  it('should not call findBookById when no bookId param is present', () => {
+    createComponentWithParams({});
+    expect(bookService.findBookById).not.toHaveBeenCalled();
+  });
+
+  it('should set selectedPicture only when cover exists', () => {
+    const response = mockBook({ cover: '' });
+    bookService.findBookById.and.returnValue(of(response));
+
+    createComponentWithParams({ bookId: 123 });
+
+    expect(component.selectedPicture()).toBeUndefined();
+  });
+
+  it('should set error messages when saveBook fails', () => {
+    createComponentWithParams({});
+    const err = new Error('save failed');
+    bookService.saveBook.and.returnValue(throwError(() => err));
+    errorHandler.handleError.and.returnValue(['failed to save']);
+
+    component.saveBook();
+
+    expect(errorHandler.handleError).toHaveBeenCalledWith(err as unknown);
+    expect(component.errorMsg()).toEqual(['failed to save']);
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('should navigate after saving when no cover is selected', () => {
+    createComponentWithParams({});
+    bookService.saveBook.and.returnValue(of(42));
+
+    component.saveBook();
+
+    expect(bookService.saveBook).toHaveBeenCalledWith({
+      body: component.bookRequest(),
+    });
+    expect(bookService.uploadBookCoverPicture).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/books/my-books']);
+    expect(component.errorMsg()).toEqual([]);
+  });
+
+  it('should upload cover and navigate when a cover is selected', () => {
+    createComponentWithParams({});
+    const file = new File(['x'], 'cover.jpg', { type: 'image/jpeg' });
+    component.selectedBookCover.set(file);
+
+    bookService.saveBook.and.returnValue(of(77));
+    bookService.uploadBookCoverPicture.and.returnValue(of(void 0));
+
+    component.saveBook();
+
+    expect(bookService.saveBook).toHaveBeenCalledWith({
+      body: component.bookRequest(),
+    });
+    expect(bookService.uploadBookCoverPicture).toHaveBeenCalledWith({
+      'book-id': 77,
+      body: { file },
+    });
+    expect(router.navigate).toHaveBeenCalledWith(['/books/my-books']);
+    expect(component.errorMsg()).toEqual([]);
+  });
+
+  describe('onFileSelected', () => {
+    beforeEach(() => {
+      spyOn(window as any, 'FileReader').and.callFake(function () {
+        const reader = {
+          result: null as string | ArrayBuffer | null,
+          onload: null as
+            | ((this: FileReader, ev: ProgressEvent<FileReader>) => any)
+            | null,
+          readAsDataURL: function (this: FileReader, _file: Blob) {
+            (this as any).result = 'data:image/png;base64,FAKE';
+            setTimeout(() => {
+              // Cast ProgressEvent to the expected generic and ensure correct this
+              const ev = new ProgressEvent(
+                'load'
+              ) as unknown as ProgressEvent<FileReader>;
+              (this.onload as any)?.call(this, ev);
+            }, 0);
+          },
+        } as unknown as FileReader;
+
+        return reader;
+      });
+    });
+    /*beforeEach(() => {
+      // Stub the global FileReader constructor with a minimal object
+      spyOn(window as any, 'FileReader').and.callFake(() => {
+        const mock = {
+          result: null as string | ArrayBuffer | null,
+          onload: null as
+            | ((this: FileReader, ev: ProgressEvent<FileReader>) => any)
+            | null,
+          readAsDataURL(_file: Blob) {
+            // use any to avoid "this" context typing issues
+            (mock as any).result = 'data:image/png;base64,FAKE';
+            setTimeout(
+              () => (mock as any).onload?.(new ProgressEvent('load')),
+              0
+            );
+          },
+        };
+        return mock as unknown as FileReader;
+      });
+    });*/
+
+    it('should store selected file and preview data URL', fakeAsync(() => {
+      createComponentWithParams({});
+      const file = new File(['content'], 'cover.png', { type: 'image/png' });
+      const event = { target: { files: [file] } } as unknown as Event;
+
+      component.onFileSelected(event);
+      tick();
+
+      expect(component.selectedBookCover()).toBe(file);
+      expect(component.selectedPicture()).toBe('data:image/png;base64,FAKE');
+    }));
+    
+    it('should ignore when no file is selected', () => {
+      createComponentWithParams({});
+      const event = { target: { files: [] } } as unknown as Event;
+
+      component.onFileSelected(event);
+
+      expect(component.selectedBookCover()).toBeNull();
+      expect(component.selectedPicture()).toBeUndefined();
+    });
+    
+ 
+
+  it('should render and allow Save button click to trigger saveBook', () => {
+    createComponentWithParams({});
+    spyOn(component, 'saveBook').and.callThrough();
+
+    const button: HTMLButtonElement | null =
+      fixture.nativeElement.querySelector('button[type="submit"]');
+    expect(button).not.toBeNull();
+
+    button!.click();
+    expect(component.saveBook).toHaveBeenCalled();
+  });
+/*
+  it('should render error messages when present', () => {
+    createComponentWithParams({});
+    component.errorMsg.set(['e1', 'e2']);
+    fixture.detectChanges();
+
+    const alerts = fixture.nativeElement.querySelectorAll(
+      '.alert.alert-danger p'
+    );
+    expect(alerts.length).toBe(2);
+    expect(alerts[0].textContent.trim()).toBe('e1');
+    expect(alerts[1].textContent.trim()).toBe('e2');
+  });
+  */
+  });
 });

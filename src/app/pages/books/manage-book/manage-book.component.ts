@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, effect } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BookRequest, BookResponse } from '../../../services/models';
 import { FormsModule } from "@angular/forms";
 import { BookService } from '../../../services/services';
-import { JsonParserService } from '../../../services/json-parser.service';
-import { ApiErrorResponse } from '../../../services/models/api-error-response';
+import { DefaulErrorHandlerService } from '../../../services/error/default-error-handler.service';
 
 
 /**
@@ -20,15 +19,8 @@ import { ApiErrorResponse } from '../../../services/models/api-error-response';
   templateUrl: './manage-book.component.html',
   styleUrl: './manage-book.component.css'
 })
-export class ManageBookComponent implements OnInit{
-
-  constructor(
-    private bookService: BookService,
-    private errorParserService: JsonParserService,
-    private router: Router,
-    private activatedRoute: ActivatedRoute
-  ){}
-
+export class ManageBookComponent {
+  /*
   errorMsg: Array<string> = [];
   bookRequest: BookRequest = {
     author_name: '',
@@ -39,8 +31,56 @@ export class ManageBookComponent implements OnInit{
   };
   selectedBookCover: any;
   selectedPicture?: string;
+  */
 
-  ngOnInit(): void {
+  bookRequest = signal<BookRequest>({
+    author_name: '',
+    isbn: '',
+    shareable: false,
+    synopsis: '',
+    title: ''
+  });
+
+  errorMsg = signal<string[]>([]);
+  selectedBookCover = signal<File | null>(null);
+  selectedPicture = signal<string | undefined>(undefined);
+
+
+  constructor(
+    private bookService: BookService,
+    private errorHandler: DefaulErrorHandlerService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {
+    effect(() => {
+      const bookId = this.activatedRoute.snapshot.params['bookId'];
+      if (bookId) {
+        this.bookService.findBookById({
+          'book-id': bookId as number
+        }).subscribe({
+          next: (bookResponse: BookResponse) => {
+            this.bookRequest.set({
+              id: bookResponse.id,
+              title: bookResponse.title as string,
+              author_name: bookResponse.author_name as string,
+              isbn: bookResponse.isbn as string,
+              synopsis: bookResponse.synopsis as string,
+              shareable: bookResponse.shareable
+            });
+            if (bookResponse.cover) {
+              this.selectedPicture.set(`data:image/jpg;base64,${bookResponse.cover}`)
+            }
+          },
+          error: (error) => {
+            this.errorMsg.set(errorHandler.handleError(error));
+          }
+        })
+      }
+    }, { allowSignalWrites: true });
+  }
+
+  /*
+  ngOnIeffecteffenit(): void {
     const bookId = this.activatedRoute.snapshot.params['bookId'];
     if(bookId){
       this.bookService.findBookById({
@@ -62,62 +102,75 @@ export class ManageBookComponent implements OnInit{
       })
     }
   }
+    
 
+  
   onFileSelected(event: any) {
     this.selectedBookCover = event.target.files[0];
     console.log(this.selectedBookCover);
 
-    if(this.selectedBookCover){
+    if (this.selectedBookCover) {
       const reader = new FileReader();
       reader.onload = () => {
         this.selectedPicture = reader.result as string;
       }
       reader.readAsDataURL(this.selectedBookCover);
     }
+  } */
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (file) {
+      this.selectedBookCover.set(file);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.selectedPicture.set(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
-  saveBook(){
+  saveBook() {
+    this.errorMsg.set([]);
+
     this.bookService.saveBook({
-      body: this.bookRequest
+      body: this.bookRequest()
     }).subscribe({
       next: (bookId: number) => {
         this.saveCoverPicture(bookId);
       },
       error: (error) => {
-        this.handleError(error);
+        this.errorMsg.set(this.errorHandler.handleError(error));
       }
     })
   }
 
-  private saveCoverPicture(bookId: number){
-    this.bookService.uploadBookCoverPicture({
-      "book-id": bookId,
-      body: {
-        file: this.selectedBookCover
-      }
-    }).subscribe({
-      next: () =>{
-        this.router.navigate(['/books/my-books']);
-      },
-      error: (error) => {
-        this.handleError(error);
-      }
-    })
-  }
-
-  private handleError(error: any) {
-    //
-    const parsedError: ApiErrorResponse = this.errorParserService.parseErrorResponse(error.error);
-    if (undefined === parsedError.timestamp) {
-      this.errorMsg.push('Something went wrong');
+  private saveCoverPicture(bookId: number) {
+    const cover = this.selectedBookCover();
+    if (!cover) {
+      this.router.navigate(['/books/my-books']);
       return;
+
     }
-    if (parsedError.validationErrors && parsedError.validationErrors.length > 0) {
-      this.errorMsg = parsedError.validationErrors;
-    } else {
-      this.errorMsg.push(parsedError.errorMessage);
-    }
-    console.log(error);
+
+    this.bookService.uploadBookCoverPicture({
+        "book-id": bookId,
+        body: {
+          file: cover
+        }
+      }).subscribe({
+        next: () => {
+          this.router.navigate(['/books/my-books']);
+          return;
+        },
+        error: (error) => {
+          this.errorMsg.set(this.errorHandler.handleError(error));
+        }
+      });
+
   }
 
 }
