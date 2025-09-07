@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { BookService } from '../../../services/services';
 import { JsonParserService } from '../../../services/json-parser.service';
 import { Router } from '@angular/router';
@@ -16,7 +17,7 @@ import { NgFor } from '@angular/common';
  */
 @Component({
   selector: 'app-my-books',
-  imports: [BookCardComponent, NgFor],
+  imports: [BookCardComponent, NgFor, RouterLink],
   templateUrl: './my-books.component.html',
   styleUrl: './my-books.component.css'
 })

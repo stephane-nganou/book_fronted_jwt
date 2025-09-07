@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BookRequest, BookResponse } from '../../../services/models';
 import { FormsModule } from "@angular/forms";
 import { BookService } from '../../../services/services';
@@ -16,7 +16,7 @@ import { ApiErrorResponse } from '../../../services/models/api-error-response';
  */
 @Component({
   selector: 'app-manage-book',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './manage-book.component.html',
   styleUrl: './manage-book.component.css'
 })
