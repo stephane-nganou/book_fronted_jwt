@@ -41,8 +41,14 @@
 <div class="col-12">
     <form class="row g-3">
         <div class="d-flex gap-3">
-            <input [(ngModel)]="feedbackRequest.note" type="range" id="rate" name="rate" class="form-range w-25" min="0"
-                max="5" step="0.5">
+            <input [(ngModel)]="feedbackRequest.note"
+                type="range"
+                id="rate"
+                name="rate"
+                class="form-range w-25"
+                min="0"
+                max="5"
+                step="0.5">
             <app-rating [rating]="feedbackRequest.note || 0"></app-rating>
             {{feedbackRequest.note}}
         </div>

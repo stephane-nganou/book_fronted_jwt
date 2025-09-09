@@ -13,26 +13,42 @@
         <div class="col-3">
             <img class="rounded-1" width="100%" height="100%" [src]="selectedPicture || ''" alt="...">
             <div class="mt-2">
-                <input (change)="onFileSelected($event)" class="form-control" type="file" id="formFile"
-                    accept="image/*">
+                <input (change)="onFileSelected($event)"
+                        class="form-control"
+                        type="file"
+                        id="formFile"
+                        name="formFile"
+                        accept="image/*">
             </div>
         </div>
         <div class="col-9">
             <form class="row g-3">
                 <div class="col-12">
                     <label for="title" class="form-label">Title</label>
-                    <input [(ngModel)]="bookRequest().title" type="text" class="form-control" id="title" name="title"
-                        placeholder="Book Title">
+                    <input [(ngModel)]="bookRequest().title"
+                            type="text"
+                            class="form-control"
+                            id="title"
+                            name="title"
+                            placeholder="Book Title">
                 </div>
                 <div class="col-6">
                     <label for="author_name" class="form-label">Author name</label>
-                    <input [(ngModel)]="bookRequest().author_name" type="text" class="form-control" id="author_name"
-                        name="author_name" placeholder="Author name">
+                    <input [(ngModel)]="bookRequest().author_name"
+                            type="text"
+                            class="form-control"
+                            id="author_name"
+                            name="author_name"
+                            placeholder="Author name">
                 </div>
                 <div class="col-6">
                     <label for="isbn" class="form-label">ISBN</label>
-                    <input [(ngModel)]="bookRequest().isbn" type="text" class="form-control" id="isbn" name="isbn"
-                        placeholder="ISBN">
+                    <input [(ngModel)]="bookRequest().isbn"
+                            type="text"
+                            class="form-control"
+                            id="isbn"
+                            name="isbn"
+                            placeholder="ISBN">
                 </div>
                 <div class="col-12">
                     <label for="synopsis" class="form-label">Synopsis</label>
@@ -40,8 +56,11 @@
                         name="synopsis" placeholder="Book synopsis"></textarea>
                 </div>
                 <div class="col-6">
-                    <input [(ngModel)]="bookRequest().shareable" class="form-check-input" type="checkbox" id="shareable"
-                        name="shareable">
+                    <input [(ngModel)]="bookRequest().shareable"
+                            class="form-check-input"
+                            type="checkbox"
+                            id="shareable"
+                            name="shareable">
                     <label for="shareable" class="form-check-label">Share me</label>
                 </div>
                 <div class="d-flex justify-content-end gap-2 col-12">

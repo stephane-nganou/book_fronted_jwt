@@ -10,19 +10,36 @@
     }
     <div class="mb-3">
         <label for="email" class="form-label">Email address</label>
-        <input [(ngModel)]="registerRequest.email" type="email" class="form-control" id="email" placeholder="name@example.com">
+        <input [(ngModel)]="registerRequest.email"
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            placeholder="name@example.com">
     </div>
     <div class="mb-3">
         <label for="firstname" class="form-label">Firstname</label>
-        <input [(ngModel)]="registerRequest.first_name" type="text" class="form-control" id="firstname">
+        <input [(ngModel)]="registerRequest.first_name"
+            type="text"
+            class="form-control"
+            name="firstname"
+            id="firstname">
     </div>
     <div class="mb-3">
         <label for="lastname" class="form-label">Lastname</label>
-        <input [(ngModel)]="registerRequest.last_name" type="text" class="form-control" id="lastname">
+        <input [(ngModel)]="registerRequest.last_name"
+            type="text"
+            class="form-control"
+            name="lastname"
+            id="lastname">
     </div>
     <div class="mb-3">
         <label for="password" class="form-label">Password</label>
-        <input [(ngModel)]="registerRequest.password" type="password" class="form-control" id="password">
+        <input [(ngModel)]="registerRequest.password"
+            type="password"
+            class="form-control"
+            name="password"
+            id="password">
     </div>
     <div class="d-flex justify-content-between mb-3">
         <button (click)="register()" type="button" class="btn btn-primary">
