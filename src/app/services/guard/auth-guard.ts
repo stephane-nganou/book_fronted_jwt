@@ -8,7 +8,7 @@ import { TokenService } from "../token/token.service";
  * @version 1.0.0
  * @date 2025-09-07
  */
-export const AuthGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = () => {
     const router = inject(Router);
     const auth = inject(TokenService);
     

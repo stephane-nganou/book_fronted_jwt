@@ -25,4 +25,10 @@ export class TokenService {
     return this.token !== null;
   }
 
+  removeToken() {
+    if(this.isAuthenticated()){
+      localStorage.removeItem('token');
+    }
+  }
+
 }

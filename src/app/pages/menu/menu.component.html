@@ -43,8 +43,8 @@
                 <button class="btn btn-outline-success" type="submit">
                     <i class="fas fa-search"></i>
                 </button>
-                <span>Welcome</span>
-                <span class="text-capitalize fw-bold">Greatness</span>
+                <span *ngIf="username() !== '' ">Welcome</span>
+                <span *ngIf="username() !== '' " class="text-capitalize fw-bold">{{username()}}</span>
                 <button class="btn btn-link"
                     type="button" (click)="logout()">
                     <i class="fas fa-door-open"></i>

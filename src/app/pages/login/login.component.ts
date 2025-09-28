@@ -6,6 +6,7 @@ import { AuthenticationService } from '../../services/services';
 import { TokenService } from '../../services/token/token.service';
 import { ApiErrorResponse } from '../../services/models/api-error-response';
 import { JsonParserService } from '../../services/json-parser.service';
+import { UserService } from '../../services/user.service';
 
 /**
  * @fileoverview LoginComponent, purpose of Log in users to get valid token for accessing
@@ -29,7 +30,8 @@ export class LoginComponent {
     private router: Router,
     private authService: AuthenticationService,
     private tokenService: TokenService,
-    private errorParserService: JsonParserService
+    private errorParserService: JsonParserService,
+    private userService: UserService
   ){}
 
   login() {
@@ -40,7 +42,7 @@ export class LoginComponent {
       next: (response) => {
         // save the token
         this.tokenService.token = response.token as string;
-
+        this.userService.username = this.authRequest.email;
         this.router.navigate(['books']);
       },
       error: (err) => {
