@@ -17,12 +17,14 @@ export class DefaulErrorHandlerService implements ErrorHandler {
 
         let errorMsg: Array<string> = [];
         const defaultErrorMsg = "Something went wrong";
+
         try {
-            const parsedError = this.errorParserService.parseErrorResponse(error.error);
-            console.log(`An error occured: ${error}`);
-            if (undefined === parsedError.timestamp) {
-                errorMsg.push(defaultErrorMsg);
-            }
+            console.log(`An error occured: `);
+            console.log(error);
+
+            const parsedError = error.error ? this.errorParserService.parseErrorResponse(error.error)
+                : error.message ? this.errorParserService.parseErrorResponse(error.message) : this.errorParserService.parseErrorResponse(error);
+            
             if (parsedError.validationErrors && parsedError.validationErrors.length > 0) {
                 errorMsg = parsedError.validationErrors;
             } else {

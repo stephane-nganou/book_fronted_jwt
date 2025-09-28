@@ -6,9 +6,10 @@ import { ApiErrorResponse } from './models/api-error-response';
 })
 export class JsonParserService {
 
-  parseErrorResponse(jsonString: string): ApiErrorResponse {
+  parseErrorResponse(jsonString: any): ApiErrorResponse {
     try {
       // parse the JSON string
+      console.log(`jsonString: ${jsonString}`);
       const parsed = JSON.parse(jsonString);
 
       // Validate the parsed object structure
@@ -26,7 +27,13 @@ export class JsonParserService {
       }
     } catch(error){
       console.error('Failed to parse JSON:', error);
-      return {} as ApiErrorResponse;
+      return {
+          timestamp: new Date().toLocaleTimeString(),
+          errorMessage: "An error occured. Please retry!",
+          validationErrors: [],
+          details: ""
+          
+        } as ApiErrorResponse;
     }
   }
 

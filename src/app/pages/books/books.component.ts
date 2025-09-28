@@ -68,8 +68,10 @@ export class BooksComponent {
         this.message.set([`Book nr: ${bookId} successfully borrowed`])
       },
       error: (error) => {
+        console.log("before errorHandlerService.handleError")
         this.level.set('error');
         this.message.set(this.errorHandlerService.handleError(error));
+        console.log("after errorHandlerService.handleError")
         },
     })
   }
