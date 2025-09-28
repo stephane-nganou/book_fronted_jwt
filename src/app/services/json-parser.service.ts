@@ -16,7 +16,13 @@ export class JsonParserService {
         return parsed as ApiErrorResponse;
       }else{
         console.warn('Parsed JSON does not match expected ApiErrorResponse structure');
-        return {} as ApiErrorResponse;
+        return {
+          timestamp: new Date().toISOString(),
+          errorMessage: jsonString,
+          validationErrors: [],
+          details: ""
+          
+        } as ApiErrorResponse;
       }
     } catch(error){
       console.error('Failed to parse JSON:', error);
