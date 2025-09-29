@@ -38,9 +38,9 @@ export class BooksComponent {
 
   isLastPage = computed(() => {
     const response = this.bookResponse();
-    if(!response){
+    if (!response) {
       return true;
-    }else{
+    } else {
       return this.page() === response.total_pages as number - 1;
     }
   });
@@ -49,14 +49,11 @@ export class BooksComponent {
     private bookService: BookService,
     private errorHandlerService: DefaulErrorHandlerService,
     private router: Router) {
-      effect(() => {
-        this.findAllBooks();
-      })
-    }
-  /*
-  ngOnInit(): void {
-    this.findAllBooks();
-  } */
+    effect(() => {
+      this.findAllBooks();
+    });
+  }
+
 
   borrowBook(book: BookResponse) {
     this.message.set([]);
@@ -68,11 +65,9 @@ export class BooksComponent {
         this.message.set([`Book nr: ${bookId} successfully borrowed`])
       },
       error: (error) => {
-        console.log("before errorHandlerService.handleError")
         this.level.set('error');
         this.message.set(this.errorHandlerService.handleError(error));
-        console.log("after errorHandlerService.handleError")
-        },
+      },
     })
   }
 

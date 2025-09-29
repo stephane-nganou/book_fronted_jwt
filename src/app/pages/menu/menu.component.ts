@@ -1,5 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, effect, OnInit, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { NgIf } from '@angular/common';
 import { TokenService } from '../../services/token/token.service';
@@ -22,10 +22,19 @@ export class MenuComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private tokenService: TokenService
-  )
-  {
-    this.username.set(this.userService.username as string);
+    private tokenService: TokenService,
+    private router: Router
+  ) {
+    effect(() => {
+      this.username.set(this.userService.username);
+    });
+  }
+
+  logout() {
+    this.tokenService.removeToken();
+    this.userService.removeUsername();
+    this.username.set("");
+    this.router.navigate(['login']);
   }
 
   ngOnInit(): void {
@@ -39,12 +48,7 @@ export class MenuComponent implements OnInit {
         linkColor.forEach(l => l.classList.remove('active'));
         link.classList.add('active');
       })
-    })
-  }
-  
-  logout() {
-    this.tokenService.removeToken();
-    this.userService.removeUsername();
+    });
   }
 
 }

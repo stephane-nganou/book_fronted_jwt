@@ -1,20 +1,24 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  set username(username: string){
+  private usernameSignal = signal<string>('');
+
+  set username(username: string) {
     localStorage.setItem('username', username);
+    this.usernameSignal.set(username);
   }
 
   get username() {
-    return localStorage.getItem('username') as string;
+    this.usernameSignal.set(localStorage.getItem('username') as string);
+    return this.usernameSignal();
   }
 
   removeUsername() {
-    if(this.username !== null){
+    if (this.username !== null) {
       localStorage.removeItem('username');
     }
   }
