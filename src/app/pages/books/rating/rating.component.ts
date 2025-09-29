@@ -1,5 +1,5 @@
 import { NgFor } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, computed, input, Input } from '@angular/core';
 
 
 /**
@@ -16,19 +16,13 @@ import { Component, Input } from '@angular/core';
 })
 export class RatingComponent {
 
-  @Input() rating: number = 0;
-  maxRating: number = 5;
+  rating = input.required<number>();
+  maxRating = 5;
 
-  get fullStars(): number {
-    return Math.floor(this.rating);
-  }
+  fullStars = computed(() => Math.floor(this.rating()));
 
-  get hasHalfStar(): boolean {
-    return this.rating % 1 !== 0;
-  }
+  hasHalfStar = computed(() => this.rating() % 1 !== 0);
 
-  get emptyStars(): number {
-    return this.maxRating - Math.ceil(this.rating);
-  }
+  emptyStars = computed(() => this.maxRating - Math.ceil(this.rating()));
 
 }
