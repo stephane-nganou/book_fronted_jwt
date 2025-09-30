@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, effect, signal } from '@angular/core';
 import { PageBorrowedBookResponse } from '../../../services/models/page-borrowed-book-response';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, NgClass } from '@angular/common';
 import { BorrowedBookResponse } from '../../../services/models/borrowed-book-response';
 import { BookService, FeedbackService } from '../../../services/services';
-import { JsonParserService } from '../../../services/json-parser.service';
-import { ApiErrorResponse } from '../../../services/models/api-error-response';
 import { FeedbackRequest, PageResponse } from '../../../services/models';
 import { FormsModule } from "@angular/forms";
 import { RatingComponent } from "../rating/rating.component";
+import { DefaulErrorHandlerService } from '../../../services/error/default-error-handler.service';
 
 /**
  * @fileoverview BorrowBooksComponent, purpose of displaying book that
@@ -18,13 +17,13 @@ import { RatingComponent } from "../rating/rating.component";
  */
 @Component({
   selector: 'app-borrow-books',
-  imports: [NgIf, NgFor, FormsModule, RatingComponent],
+  imports: [NgIf, NgFor, FormsModule, RatingComponent, NgClass],
   templateUrl: './borrow-books.component.html',
   styleUrl: './borrow-books.component.css'
 })
-export class BorrowBooksComponent implements OnInit {
+export class BorrowBooksComponent {
 
-  borrowedBooksPage: PageBorrowedBookResponse = {
+  borrowedBooksPage = signal<PageBorrowedBookResponse>({
     content: [],
     first: false,
     last: false,
@@ -32,119 +31,103 @@ export class BorrowBooksComponent implements OnInit {
     size: 0,
     total_elements: 0,
     total_pages: 0
-  }
-  feedbackRequest: FeedbackRequest = {
+  });
+
+  feedbackRequest = signal<FeedbackRequest>({
     book_id: 0,
     comment: '',
     note: 0
-  };
-  selectedBookResponse: BorrowedBookResponse | undefined = undefined;
+  });
 
-  page: number = 0;
-  size: number = 5;
-  errorMsg: Array<string> = [];
+  selectedBookResponse = signal<BorrowedBookResponse | undefined>(undefined);
+
+  page = signal<number>(0);
+  size = signal<number>(5);
+  errorMsg = signal<string[]>([]);
+
+  isLastPage = computed(() => this.borrowedBooksPage().total_pages - 1);
+  pageNumbers = computed(() => Array.from({length: this.borrowedBooksPage().total_pages }, (_, i) => i))
 
   constructor(
     private bookService: BookService,
-    private errorParserService: JsonParserService,
-    private feedbackService: FeedbackService
-  ){}
-
-  ngOnInit(): void {
-    this.getAllBorrowedBooks();
+    private feedbackService: FeedbackService,
+    private errorHandlerService: DefaulErrorHandlerService
+  ) {
+    effect(() => {
+      this.getAllBorrowedBooks();
+    });
   }
 
   returnBook(withFeedback: boolean) {
+    if (!this.selectedBookResponse()) return;
     this.bookService.returnBorrowBook({
-      "book-id": this.selectedBookResponse!.id
+      "book-id": this.selectedBookResponse()!.id
     }).subscribe({
       next: () => {
-        if(withFeedback){
+        if (withFeedback) {
           this.giveFeedback();
         }
-        this.selectedBookResponse = undefined;
+        this.selectedBookResponse.set(undefined);
         this.getAllBorrowedBooks();
       },
-      error: (error) => this.handleError(error)
-    })
+      error: (error) => {
+        this.errorMsg.set(this.errorHandlerService.handleError(error));
+      }
+    });
   }
 
   returnBorrowedBook(book: BorrowedBookResponse) {
-    this.selectedBookResponse = book;
-    this.feedbackRequest.book_id = book.id;
+    this.selectedBookResponse.set(book);
+    this.feedbackRequest.update(req => ({ ...req, book_id: book.id }));
   }
 
   goToPage(page: number) {
-    this.page = page;
+    this.page.set(page);
     this.getAllBorrowedBooks();
   }
 
   goToLastPage() {
-    this.page = this.borrowedBooksPage?.total_pages as number - 1;
-    this.getAllBorrowedBooks();
+    this.page.set(this.borrowedBooksPage().total_pages - 1);
+    this.getAllBorrowedBooks(); // will be triggered automatically
   }
 
   goToNextPage() {
-    this.page++;
-    this.getAllBorrowedBooks();
+    this.page.set(this.page() + 1);
+    this.getAllBorrowedBooks(); // will be triggered automatically
   }
 
   goToPreviousPage() {
-    this.page--;
-    this.getAllBorrowedBooks();
+    this.page.update(current => current - 1);
+    this.getAllBorrowedBooks(); // will be triggered automatically
   }
 
   goToFirstPage() {
-    this.page = 0;
-    this.getAllBorrowedBooks();
+    this.page.set(0);
   }
 
-  get isLastPage(): boolean {
-    return this.page === this.borrowedBooksPage?.total_pages as number - 1;
-  }
-
-  private getAllBorrowedBooks(){
+  getAllBorrowedBooks() {
     this.bookService.getAllBorrowedBooks({
-      page: this.page,
-      size: this.size
+      page: this.page(),
+      size: this.size()
     }).subscribe({
-      next:(response: PageResponse) => {
-        this.borrowedBooksPage = response as PageBorrowedBookResponse;
+      next: (response: PageResponse) => {
+        this.borrowedBooksPage.set(response as PageBorrowedBookResponse);
       },
       error: (error) => {
-        this.handleError(error);
+        this.errorMsg.set(this.errorHandlerService.handleError(error));
       }
     })
   }
 
-  private giveFeedback(){
+  private giveFeedback() {
     this.feedbackService.saveFeedback({
-      body: this.feedbackRequest
+      body: this.feedbackRequest()
     }).subscribe({
-      next: () => {},
+      next: () => { },
       error: (error) => {
-        this.handleError(error);
+        this.errorMsg.set(this.errorHandlerService.handleError(error));
       }
     })
   }
-
-  private handleError(error: any) {
-    
-    console.log(error);
-    const parsedError = this.errorParserService.parseErrorResponse(error.error);
-    if (undefined === parsedError.timestamp) {
-      this.errorMsg.push('Something went wrong');
-      return;
-    }
-    if (parsedError.validationErrors && parsedError.validationErrors.length > 0) {
-      this.errorMsg = parsedError.validationErrors;
-      return;
-    } else {
-      this.errorMsg.push(parsedError.errorMessage);
-      return;
-    }
-  }
-  
-  
 
 }

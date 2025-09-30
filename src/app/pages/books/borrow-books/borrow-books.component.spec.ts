@@ -9,6 +9,7 @@ import { FormsModule } from "@angular/forms";
 import { of, throwError } from "rxjs";
 import { By } from "@angular/platform-browser";
 import { ApiErrorResponse } from "../../../services/models/api-error-response";
+import { DefaulErrorHandlerService } from "../../../services/error/default-error-handler.service";
 
 
 
@@ -17,7 +18,8 @@ describe('BorrowBooksComponent', () => {
     let fixture: ComponentFixture<BorrowBooksComponent>;
     let bookServiceSpy: jasmine.SpyObj<BookService>;
     let feedbackServceSpy: jasmine.SpyObj<FeedbackService>;
-    let jsonParserServiceSpy: jasmine.SpyObj<JsonParserService>;
+    //let jsonParserServiceSpy: jasmine.SpyObj<JsonParserService>;
+    let errorHandlerServiceSpy: jasmine.SpyObj<DefaulErrorHandlerService>;
 
     const mockBorrowedBookResponse: BorrowedBookResponse = {
         id: 1,
@@ -42,15 +44,17 @@ describe('BorrowBooksComponent', () => {
     beforeEach(async () => {
         // prepare
         bookServiceSpy = jasmine.createSpyObj('BookService', ['getAllBorrowedBooks', 'returnBorrowBook']);
-        jsonParserServiceSpy = jasmine.createSpyObj('JsonParserService', ['parseErrorResponse']);
+        //jsonParserServiceSpy = jasmine.createSpyObj('JsonParserService', ['parseErrorResponse']);
         feedbackServceSpy = jasmine.createSpyObj('FeedbackService', ['saveFeedback']);
+        errorHandlerServiceSpy = jasmine.createSpyObj('DefaulErrorHandlerService', ['handleError']);
 
         await TestBed.configureTestingModule({
             imports: [FormsModule, BorrowBooksComponent, RatingComponent],
             providers: [
                 { provide: BookService, useValue: bookServiceSpy },
-                { provide: JsonParserService, useValue: jsonParserServiceSpy },
-                { provide: FeedbackService, useValue: feedbackServceSpy }
+                //{ provide: JsonParserService, useValue: jsonParserServiceSpy },
+                { provide: FeedbackService, useValue: feedbackServceSpy },
+                { provide: DefaulErrorHandlerService, useValue: errorHandlerServiceSpy }
             ]
         }).compileComponents();
 
@@ -68,19 +72,19 @@ describe('BorrowBooksComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should initialize with borrowed books on ngOnInit', fakeAsync(() => {
+    it('should initialize with borrowed books', fakeAsync(() => {
         // test
-        component.ngOnInit();
         tick();
 
         // verify
         expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({ page: 0, size: 5 });
-        expect(component.borrowedBooksPage).toEqual(mockPageResponse);
+        expect(component.borrowedBooksPage()).toEqual(mockPageResponse);
     }));
 
     
     it('should display borrowed books in table when no book is selected', () => {
         // test
+        fixture.detectChanges();
         const tableRows = fixture.debugElement.queryAll(By.css('table tbody'));
 
         // verify
@@ -92,13 +96,13 @@ describe('BorrowBooksComponent', () => {
         component.returnBorrowedBook(mockBorrowedBookResponse);
 
         // verify
-        expect(component.selectedBookResponse).toEqual(mockBorrowedBookResponse);
-        expect(component.feedbackRequest.book_id).toEqual(mockBorrowedBookResponse.id);
+        expect(component.selectedBookResponse()).toEqual(mockBorrowedBookResponse);
+        expect(component.feedbackRequest().book_id).toEqual(mockBorrowedBookResponse.id);
     });
 
     it('should display book details and feedback form when a book is selected', () => {
         // test
-        component.selectedBookResponse = mockBorrowedBookResponse;
+        component.selectedBookResponse.set(mockBorrowedBookResponse);
         fixture.detectChanges();
         const bookDetails = fixture.debugElement.query(By.css('.d-flex.flex-column.col-6'));
 
@@ -117,7 +121,7 @@ describe('BorrowBooksComponent', () => {
 
     it('should call returnBook service when returning a book without feedback', fakeAsync(() => {
         // prepare
-        component.selectedBookResponse = mockBorrowedBookResponse;
+        component.selectedBookResponse.set(mockBorrowedBookResponse);
         bookServiceSpy.returnBorrowBook.and.returnValue(of());
 
         // test
@@ -126,20 +130,20 @@ describe('BorrowBooksComponent', () => {
 
         // verify
         expect(bookServiceSpy.returnBorrowBook).toHaveBeenCalledWith({ "book-id": mockBorrowedBookResponse.id });
-        expect(component.borrowedBooksPage).toBe(mockPageResponse);
-        expect(component.selectedBookResponse).toBeDefined();
+        expect(component.borrowedBooksPage()).toBe(mockPageResponse);
+        expect(component.selectedBookResponse()).toBeDefined();
         expect(feedbackServceSpy.saveFeedback).not.toHaveBeenCalled();
     }));
 
     it('should call returnBook and saveFeedback services when returning a book with feedback',
         fakeAsync(() => {
             // prepare
-            component.selectedBookResponse = mockBorrowedBookResponse;
-            component.feedbackRequest = {
+            component.selectedBookResponse.set(mockBorrowedBookResponse)
+            component.feedbackRequest.set({
                 book_id: mockBorrowedBookResponse.id,
                 comment: 'Great Book',
                 note: 4
-            };
+            });
             bookServiceSpy.returnBorrowBook.and.returnValue(of(mockBorrowedBookResponse.id));
             feedbackServceSpy.saveFeedback.and.returnValue(of());
 
@@ -150,8 +154,8 @@ describe('BorrowBooksComponent', () => {
             // verify
             expect(bookServiceSpy.returnBorrowBook).toHaveBeenCalledWith({"book-id": mockBorrowedBookResponse.id});
             expect(feedbackServceSpy.saveFeedback).toHaveBeenCalled();
-            expect(component.selectedBookResponse).toBeUndefined();
-            expect(component.selectedBookResponse).toBeUndefined();
+            expect(component.selectedBookResponse()).toBeUndefined();
+            expect(component.selectedBookResponse()).toBeUndefined();
             expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
         })
     );
@@ -160,29 +164,28 @@ describe('BorrowBooksComponent', () => {
         fakeAsync(() => {
             component.goToNextPage();
             tick();
-            expect(component.page).toBe(1);
+            expect(component.page()).toBe(1);
             expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 1, size: 5});
-
+            
             component.goToPreviousPage();
             tick();
-            expect(component.page).toBe(0);
+            expect(component.page()).toBe(0);
             expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
 
             component.goToLastPage();
             tick();
-            expect(component.page).toBe(0);
+            expect(component.page()).toBe(0);
             expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
 
             component.goToFirstPage();
             tick();
-            expect(component.page).toBe(0);
+            expect(component.page()).toBe(0);
             expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
 
             component.goToPage(2);
             tick();
-            expect(component.page).toBe(2);
+            expect(component.page()).toBe(2);
             expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 2, size: 5});
-
         }
         )
     );
@@ -190,8 +193,8 @@ describe('BorrowBooksComponent', () => {
     
     it('should disable next page button when on last page', () => {
         // prepare
-        component.borrowedBooksPage = { ...mockPageResponse, last: true };
-        component.page = 0;
+        component.borrowedBooksPage.set({ ...mockPageResponse, last: true });
+        component.page.set(0);
 
         // test
         fixture.detectChanges();
@@ -201,7 +204,6 @@ describe('BorrowBooksComponent', () => {
         expect(nextButton.classes['disabled']).toBeTruthy();
     });
     
-
     it('should handle error response correctly', 
         fakeAsync(() => {
             // prepare
@@ -211,9 +213,10 @@ describe('BorrowBooksComponent', () => {
                 errorMessage: 'Validation failed',
                 details: 'Validation error'
             };
-            jsonParserServiceSpy.parseErrorResponse.and.returnValue(errorResponse);
+            //jsonParserServiceSpy.parseErrorResponse.and.returnValue(errorResponse);
             bookServiceSpy.returnBorrowBook.and.returnValue(throwError(() => ({error: errorResponse})));
-            component.selectedBookResponse = mockBorrowedBookResponse;
+            errorHandlerServiceSpy.handleError.and.returnValue(errorResponse.validationErrors);
+            component.selectedBookResponse.set(mockBorrowedBookResponse);
 
             // test
             component.returnBook(true);
@@ -221,8 +224,8 @@ describe('BorrowBooksComponent', () => {
             fixture.detectChanges();
 
             // verify
-            expect(jsonParserServiceSpy.parseErrorResponse).toHaveBeenCalled();
-            expect(component.errorMsg).toEqual(['Error 1', 'Error 2']);
+            expect(errorHandlerServiceSpy.handleError).toHaveBeenCalled();
+            expect(component.errorMsg()).toEqual(['Error 1', 'Error 2']);
             const errorDiv = fixture.debugElement.query(By.css('.alert.alert-danger'));
             expect(errorDiv).toBeTruthy();
             expect(errorDiv.queryAll(By.css('p')).length).toBe(2);
@@ -238,9 +241,10 @@ describe('BorrowBooksComponent', () => {
                 validationErrors: [],
                 details: ''
             };
-            jsonParserServiceSpy.parseErrorResponse.and.returnValue(errorResponse);
+            //jsonParserServiceSpy.parseErrorResponse.and.returnValue(errorResponse);
             bookServiceSpy.returnBorrowBook.and.returnValue(throwError(() => ({error: errorResponse})));
-            component.selectedBookResponse = mockBorrowedBookResponse;
+            errorHandlerServiceSpy.handleError.and.returnValue([errorResponse.errorMessage]);
+            component.selectedBookResponse.set(mockBorrowedBookResponse);
 
             // test
             component.returnBook(true);
@@ -248,14 +252,14 @@ describe('BorrowBooksComponent', () => {
             fixture.detectChanges();
 
             // verify
-            expect(component.errorMsg).toEqual(['Server error']);
+            expect(component.errorMsg()).toEqual(['Server error']);
         })
     );
 
     it('should cancel book selection', () => {
         // prepare
-        component.selectedBookResponse = mockBorrowedBookResponse;
-        component.feedbackRequest = {book_id: mockBorrowedBookResponse.id, comment: 'Test', note: 3};
+        component.selectedBookResponse.set(mockBorrowedBookResponse);
+        component.feedbackRequest.set({book_id: mockBorrowedBookResponse.id, comment: 'Test', note: 3});
         fixture.detectChanges();
 
         // test
@@ -263,8 +267,9 @@ describe('BorrowBooksComponent', () => {
         cancelButton.click();
 
         // verify
-        expect(component.selectedBookResponse).toBeUndefined();
+        expect(component.selectedBookResponse()).toBeUndefined();
     });
+
 
     /* Todo: fix test
     it('should update feedback request when input changes', fakeAsync(() => {
