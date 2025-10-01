@@ -1,6 +1,6 @@
 import { Component, computed, effect, signal } from '@angular/core';
 import { PageBorrowedBookResponse } from '../../../services/models/page-borrowed-book-response';
-import { NgFor, NgIf, NgClass } from '@angular/common';
+import { NgIf, NgClass } from '@angular/common';
 import { BorrowedBookResponse } from '../../../services/models/borrowed-book-response';
 import { BookService, FeedbackService } from '../../../services/services';
 import { FeedbackRequest, PageResponse } from '../../../services/models';
@@ -17,7 +17,7 @@ import { DefaulErrorHandlerService } from '../../../services/error/default-error
  */
 @Component({
   selector: 'app-borrow-books',
-  imports: [NgIf, NgFor, FormsModule, RatingComponent, NgClass],
+  imports: [NgIf, FormsModule, RatingComponent, NgClass],
   templateUrl: './borrow-books.component.html',
   styleUrl: './borrow-books.component.css'
 })

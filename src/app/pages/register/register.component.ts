@@ -54,7 +54,7 @@ export class RegisterComponent {
 
   private handleError(error: any) {
     const parsedError: ApiErrorResponse =
-      this.errorJsonService.parseErrorResponse(error.error);
+      this.errorJsonService.parseErrorResponse(error.error, error.status);
     if (undefined === parsedError.timestamp) {
       this.errorMsg.push('Something went wrong');
       return;

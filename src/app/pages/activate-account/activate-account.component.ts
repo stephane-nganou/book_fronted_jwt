@@ -57,7 +57,7 @@ export class ActivateAccountComponent {
   }
 
   private handleError(error: any) {
-      const parsedError: ApiErrorResponse = this.errorParseService.parseErrorResponse(error.error);
+      const parsedError: ApiErrorResponse = this.errorParseService.parseErrorResponse(error.error, error.status);
       
       this.message = parsedError.errorMessage;
       this.submitted = true;

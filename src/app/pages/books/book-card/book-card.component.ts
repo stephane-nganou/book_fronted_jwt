@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { BookResponse } from '../../../services/models';
 import { NgIf } from '@angular/common';
 import { RatingComponent } from "../rating/rating.component";
@@ -18,75 +18,47 @@ import { RatingComponent } from "../rating/rating.component";
 })
 export class BookCardComponent {
 
-  @Output() private share: EventEmitter<BookResponse> = new EventEmitter<BookResponse>();
-  @Output() private archive: EventEmitter<BookResponse> = new EventEmitter<BookResponse>();
-  @Output() private addToWaitingList: EventEmitter<BookResponse> = new EventEmitter<BookResponse>();
-  @Output() private borrow: EventEmitter<BookResponse> = new EventEmitter<BookResponse>();
-  @Output() private edit: EventEmitter<BookResponse> = new EventEmitter<BookResponse>();
-  @Output() private details: EventEmitter<BookResponse> = new EventEmitter<BookResponse>();
+  share = output<BookResponse>();
+  archive = output<BookResponse>();
+  addToWaitingList = output<BookResponse>();
+  borrow = output<BookResponse>();
+  edit = output<BookResponse>();
+  details = output<BookResponse>();
 
-  private _book: BookResponse = {
-    archived: false,
-    author_name: '',
-    id: 0,
-    isbn: '',
-    owner: '',
-    rate: 0,
-    shareable: false,
-    synopsis: '',
-    title: ''
-  };
-  
-  private _bookCover?: string | undefined;
-  private _manage = false;
+  book = input.required<BookResponse>();
 
-  public get manage() {
-    return this._manage;
-  }
+  manage = input<boolean>(false);
 
-  @Input()
-  public set manage(value) {
-    this._manage = value;
-  }
-
-  public get bookCover(): string | undefined {
-    if (this._book.cover) {
-      return 'data:image/jpg;base64, ' + this._book.cover;
+  bookCover = computed(() => {
+    const book = this.book();
+    if (book.cover) {
+      return 'data:image/jpg;base64,' + book.cover;
     }
-
-    // default picture
     return '';
-  }
-
-  public set bookCover(value: string | undefined) {
-    this._bookCover = value;
-  }
-
-  public get book(): BookResponse {
-    return this._book;
-  }
-
-  @Input()
-  public set book(value: BookResponse) {
-    this._book = value;
-  }
+  });
 
   onArchive() {
-    this.archive.emit(this._book);
+    this.archive.emit(this.book());
   }
+
   onShare() {
-    this.share.emit(this._book);
+    this.share.emit(this.book());
   }
+
   onEdit() {
-    this.edit.emit(this._book);
+    this.edit.emit(this.book());
   }
+
   onAddToWaitingList() {
-    this.addToWaitingList.emit(this._book);
+    this.addToWaitingList.emit(this.book());
   }
+
   onBorrow() {
-    this.borrow.emit(this._book);
+    this.borrow.emit(this.book());
   }
+
   onShowDetails() {
-    this.details.emit(this._book);
+    this.details.emit(this.book());
   }
+
 }

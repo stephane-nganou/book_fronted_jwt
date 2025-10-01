@@ -22,8 +22,8 @@ export class DefaulErrorHandlerService implements ErrorHandler {
             console.log(`An error occured: `);
             console.log(error);
 
-            const parsedError = error.error ? this.errorParserService.parseErrorResponse(error.error)
-                : error.message ? this.errorParserService.parseErrorResponse(error.message) : this.errorParserService.parseErrorResponse(error);
+            const parsedError = error.error ? this.errorParserService.parseErrorResponse(error.error, error.status)
+                : error.message ? this.errorParserService.parseErrorResponse(error.message, error.status) : this.errorParserService.parseErrorResponse(error, error.status);
             
             if (parsedError.validationErrors && parsedError.validationErrors.length > 0) {
                 errorMsg = parsedError.validationErrors;
