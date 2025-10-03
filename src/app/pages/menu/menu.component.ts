@@ -1,4 +1,4 @@
-import { Component, effect, OnInit, signal } from '@angular/core';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { NgIf } from '@angular/common';
@@ -18,22 +18,16 @@ import { TokenService } from '../../services/token/token.service';
 })
 export class MenuComponent implements OnInit {
 
-  username = signal<string>("");
+  private userService = inject(UserService);
+  private tokenService = inject(TokenService);
+  private router = inject(Router);
 
-  constructor(
-    private userService: UserService,
-    private tokenService: TokenService,
-    private router: Router
-  ) {
-    effect(() => {
-      this.username.set(this.userService.username);
-    });
-  }
+  username = this.userService.usernameSignal;
 
+  
   logout() {
     this.tokenService.removeToken();
     this.userService.removeUsername();
-    this.username.set("");
     this.router.navigate(['login']);
   }
 
