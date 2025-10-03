@@ -43,7 +43,7 @@ export class LoginComponent {
         // save the token
         this.tokenService.token = response.token as string;
         this.userService.username = this.authRequest.email;
-        this.router.navigate(['my-books']);
+        this.router.navigate(['']);
       },
       error: (err) => {
         this.handleError(err);
