@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthenticationService } from '../../services/services';
-import { NgIf } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { JsonParserService } from '../../services/json-parser.service';
 import { ApiErrorResponse } from '../../services/models/api-error-response';
+import { DefaulErrorHandlerService } from '../../services/error/default-error-handler.service';
 
 
 /**
@@ -15,30 +16,45 @@ import { ApiErrorResponse } from '../../services/models/api-error-response';
  */
 @Component({
   selector: 'app-activate-account',
-  imports: [NgIf, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './activate-account.component.html',
   styleUrl: './activate-account.component.css'
 })
 export class ActivateAccountComponent {
 
-  message = '';
-  isOkay = true;
-  submitted = false;
-  activation_code = '';
+  private router = inject(Router);
+  private authService = inject(AuthenticationService);
+  private errorHandler = inject(DefaulErrorHandlerService);
+  private fb = inject(FormBuilder);
 
-  constructor(
-    private router: Router,
-    private authService: AuthenticationService,
-    private errorParseService: JsonParserService
-  ){}
+  message = signal<string[]>([]);
+  isOkay = signal<boolean>(true);
+  submitted = signal<boolean>(false);
+  isLoading = signal<boolean>(false);
 
-  onCodeCompleted(){
-    console.log(`Actication code: ${this.activation_code}`);
-    this.confirmAccount(this.activation_code);
+  activationForm: FormGroup = this.fb.group({
+    activationCode: ['', [Validators.required, Validators.minLength(6)]]
+  });
+
+  onSubmit(){
+    if(this.activationForm.invalid){
+      this.activationForm.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.confirmAccount(this.activationForm.get('activationCode')?.value);
+  }
+
+  resetForm() {
+    this.submitted.set(false);
+    this.activationForm.reset();
+    this.message.set([]);
+    this.isOkay.set(true);
   }
 
   redirectToLogin() {
-    this.router.navigate(['login'])
+    this.router.navigate(['login']);
   }
 
   private confirmAccount(token: string){
@@ -46,22 +62,16 @@ export class ActivateAccountComponent {
       token
     }).subscribe({
       next: () => {
-        this.message = "Your account has been successfully activated. \nNow you can proceed to login";
-        this.submitted = true;
-        this.isOkay = true;
+        this.message.set(["Your account has been successfully activated. \nNow you can proceed to login."]);
+        this.submitted.set(true);
+        this.isOkay.set(true);
+        this.isLoading.set(false);
       },
       error: (error) => {
-        this.handleError(error);
+        this.message.set(this.errorHandler.handleError(error));
+        this.isLoading.set(false);
       }
-    })
+    });
   }
 
-  private handleError(error: any) {
-      const parsedError: ApiErrorResponse = this.errorParseService.parseErrorResponse(error.error, error.status);
-      
-      this.message = parsedError.errorMessage;
-      this.submitted = true;
-      this.isOkay = false;
-      console.log(error);
-    }
 }
