@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { RegisterRequest } from '../../services/models';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { AuthenticationService } from '../../services/services';
-import { JsonParserService } from '../../services/json-parser.service';
-import { ApiErrorResponse } from '../../services/models/api-error-response';
+import { CommonModule } from '@angular/common';
+import { DefaulErrorHandlerService } from '../../services/error/default-error-handler.service';
 
 /**
  * @fileoverview RegisterComponent, purpose of redering a page enabling a new user to register.
@@ -14,59 +14,77 @@ import { ApiErrorResponse } from '../../services/models/api-error-response';
  */
 @Component({
   selector: 'app-register',
-  imports: [FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {
-  registerRequest: RegisterRequest = {
-    email: '',
-    first_name: '',
-    last_name: '',
-    password: '',
-  };
-  errorMsg: Array<string> = [];
+
+  readonly errorMessages = signal<string[]>([]);
+  readonly isLoading = signal(false);
+  readonly registerForm: FormGroup;
+
 
   constructor(
+    private fb: FormBuilder,
+    private errorHandlerService: DefaulErrorHandlerService,
     private router: Router,
-    private authService: AuthenticationService,
-    private errorJsonService: JsonParserService
-  ) {}
-
-  register() {
-    this.errorMsg = [];
-    this.authService
-      .register({
-        body: this.registerRequest,
-      })
-      .subscribe({
-        next: () => {
-          this.router.navigate(['activate-account']);
-        },
-        error: (error) => {
-          this.handleError(error);
-        },
-      });
+    private authService: AuthenticationService
+  ) {
+    this.registerForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
+      password: ['', [Validators.required, Validators.minLength(8)]]
+    });
   }
-  login() {
+
+  onSubmit() {
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessages.set([]);
+
+    const registerRequest: RegisterRequest = {
+      email: this.registerForm.get('email')?.value,
+      first_name: this.registerForm.get('firstName')?.value,
+      last_name: this.registerForm.get('lastName')?.value,
+      password: this.registerForm.get('email')?.value,
+    };
+
+    this.authService.register({
+      body: registerRequest
+    }).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.router.navigate(['activate-account']);
+      },
+      error: (error: any) => {
+        this.errorMessages.set(this.errorHandlerService.handleError(error));
+      }
+    });
+  }
+
+  navigateToLogin() {
     this.router.navigate(['login']);
   }
 
-  private handleError(error: any) {
-    const parsedError: ApiErrorResponse =
-      this.errorJsonService.parseErrorResponse(error.error, error.status);
-    if (undefined === parsedError.timestamp) {
-      this.errorMsg.push('Something went wrong');
-      return;
-    }
-    if (
-      parsedError.validationErrors &&
-      parsedError.validationErrors.length > 0
-    ) {
-      this.errorMsg = parsedError.validationErrors;
-    } else {
-      this.errorMsg.push(parsedError.errorMessage);
-    }
-    console.log(error);
+  get emailControl() {
+    return this.registerForm.get('email');
+  }
+
+  get firstNameControl() {
+    return this.registerForm.get('firstName');
+  }
+
+  get lastNameControl() {
+    return this.registerForm.get('lastName');
+  }
+
+  get passwordControl() {
+    return this.registerForm.get('password');
   }
 }
