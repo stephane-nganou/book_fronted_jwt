@@ -635,6 +635,49 @@
         ]
       }
     },
+    "/books/archive/{book-id}": {
+      "patch": {
+        "tags": ["Book"],
+        "summary": "updateArchiveStatus",
+        "description": "Update the archive status of a targeted book",
+        "operationId": "updateArchiveStatus",
+        "parameters": [
+          {
+            "name": "book-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Operation not permitted because not book owner"
+          },
+          "404": {
+            "description": "Book not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/books/shareable/{book-id}": {
       "patch": {
         "tags": ["Book"],

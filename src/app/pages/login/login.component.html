@@ -1,30 +1,73 @@
 <div class="container-fluid card login-container">
     <h3 class="text-center">Login</h3>
     <hr>
-    @if(errorMsg.length){
-        <div class="alert alert-danger" role="alert">
-            @for (msg of errorMsg; track msg){
-                <p>{{msg}}</p>
+    @if(errorMessages().length){
+    <div class="alert alert-danger" role="alert">
+        @for (msg of errorMessages(); track msg){
+        <p>{{msg}}</p>
+        }
+    </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input
+                formControlName="email"
+                type="email"
+                class="form-control"
+                id="email"
+                placeholder="email@example.com"
+                aria-describedby="emailError"
+                [attr.aria-invalid]="emailControl?.invalid && emailControl?.touched"
+                required
+            >
+            @if (emailControl?.invalid && emailControl?.touched) {
+            <div id="emailError" class="text-danger">
+                @if(emailControl?.errors?.['required']){
+                <small>Email is required</small>
+                }@else if(emailControl?.errors?.['email']) {
+                <small>Please enter a valid Email</small>
+                }
+            </div>
             }
         </div>
-    }
-    <div class="mb-3">
-        <label for="login" class="form-label">Email address</label>
-        <input [(ngModel)]="authRequest.email" type="email" class="form-control" id="login" placeholder="name@example.com">
-    </div>
-    <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input [(ngModel)]="authRequest.password" type="password" class="form-control" id="password" placeholder="Password">
-    </div>
-    <div class="d-flex justify-content-between mb-3">
-        <button (click)="login()" type="button" class="btn btn-primary">
-            <em class="fas fa-sign-in-alt">&nbsp;Sign in</em>
-        </button>
-        <div>
-            Don't have an account?
-            <button (click)="register()" type="button" class="btn btn-link">
-                Register
-            </button>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input formControlName="password" type="password" class="form-control" id="password" placeholder="password"
+                aria-describedby="passwordError"
+                [attr.aria-invalid]="passwordControl?.invalid && passwordControl?.touched" required>
+            @if (passwordControl?.invalid && passwordControl?.touched) {
+            <div id="passwordError" class="text-danger">
+                @if(passwordControl?.errors?.['required']){
+                <small>Password is required</small>
+                }@else if(passwordControl?.errors?.['minlength']) {
+                <small>Password must be at least 8 characters long</small>
+                }
+            </div>
+            }
         </div>
-    </div>
+
+        <div class="d-flex justify-content-between mb-3 align-items-center">
+            <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="isLoading() || loginForm.invalid">
+                @if (isLoading()) {
+                    <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true">
+                    </span>
+                }
+                <i class="fas fa-sign-in-alt"></i>
+                &nbsp;Sign in
+            </button>
+            <div>
+                Don't have an account?&nbsp;
+                <button type="button" class="btn btn-link" (click)="navigateToRegister()" [disabled]="isLoading()">
+                    Register
+                </button>
+            </div>
+        </div>
+
+    </form>
 </div>
