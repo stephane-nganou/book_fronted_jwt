@@ -12,9 +12,16 @@
     <form [formGroup]="loginForm" (ngSubmit)="login()">
         <div class="mb-3">
             <label for="email" class="form-label">Email address</label>
-            <input formControlName="email" type="email" class="form-control" id="email" placeholder="email"
-                aria-describedby="emailError" [attr.aria-invalid]="emailControl?.invalid && emailControl?.touched"
-                required>
+            <input
+                formControlName="email"
+                type="email"
+                class="form-control"
+                id="email"
+                placeholder="email@example.com"
+                aria-describedby="emailError"
+                [attr.aria-invalid]="emailControl?.invalid && emailControl?.touched"
+                required
+            >
             @if (emailControl?.invalid && emailControl?.touched) {
             <div id="emailError" class="text-danger">
                 @if(emailControl?.errors?.['required']){

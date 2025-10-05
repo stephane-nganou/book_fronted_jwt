@@ -17,7 +17,7 @@
                 type="email"
                 class="form-control"
                 id="email"
-                placeholder="name"
+                placeholder="email@example.com"
                 aria-describedby="emailError"
                 [attr.aria-invalid]="emailControl?.invalid && emailControl?.touched"
                 required
@@ -108,7 +108,8 @@
             >
             <span *ngIf="isLoading()" class="spinner-border spinner-border-sm"
                 role="status" aria-hidden="true"></span>
-                <em class="fas fa-sign-in-alt">&nbsp;Create an account</em>
+                <i class="fas fa-sign-in-alt"></i>
+                &nbsp;Create an account
             </button>
         </div>
         <div>
