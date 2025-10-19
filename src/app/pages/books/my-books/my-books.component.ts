@@ -34,7 +34,7 @@ export class MyBooksComponent {
     if(!response){
       return true;
     }else{
-      return this.page() === response.total_pages as number - 1;
+      return this.page() === response.total_pages as number;
     }
   });
 
@@ -115,6 +115,7 @@ export class MyBooksComponent {
       })
       .subscribe({
         next: (books: PageResponse) => {
+          this.level.set('success');
           this.bookResponse.set(books as PageBookResponse);
         },
         error: (error) => {

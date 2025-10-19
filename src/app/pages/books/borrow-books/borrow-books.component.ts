@@ -45,7 +45,7 @@ export class BorrowBooksComponent {
   size = signal<number>(5);
   errorMsg = signal<string[]>([]);
 
-  isLastPage = computed(() => this.borrowedBooksPage().total_pages - 1);
+  isLastPage = computed(() => this.borrowedBooksPage().total_pages);
   pageNumbers = computed(() => Array.from({length: this.borrowedBooksPage().total_pages }, (_, i) => i))
 
   constructor(
