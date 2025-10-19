@@ -21,15 +21,6 @@ import { DefaulErrorHandlerService } from '../../services/error/default-error-ha
 })
 export class BooksComponent {
 
-  /*
-  page: number = 0;
-  size: number = 10;
-  message: Array<string> = [];
-  level: string = 'success';
-  
-  bookResponse?: PageBookResponse;
-  */
-
   page = signal<number>(0);
   size = signal<number>(10);
   message = signal<string[]>([]);
@@ -72,43 +63,38 @@ export class BooksComponent {
   }
 
   goToPage(page: number) {
-    this.page.set(page);
-    //this.findAllBooks();
+    if (this.bookResponse()) {
+      if (page < 0 || page > this.bookResponse()!.total_pages) {
+        this.page.set(0);
+      } else {
+        this.page.set(0);
+      }
+
+      this.findAllBooks()
+    }
+
   }
 
   goToLastPage() {
-    //this.page = this.bookResponse?.total_pages as number - 1;
-    //this.findAllBooks();
     const totalPages = this.bookResponse()?.total_pages ?? 0;
-    this.page.set(totalPages - 1);
+    this.page.set(totalPages);
+    this.findAllBooks();
   }
 
   goToNextPage() {
-    //this.page++;
-    //this.findAllBooks();
     this.page.update((current) => current + 1);
+    this.findAllBooks();
   }
 
   goToPreviousPage() {
-    //this.page--;
-    //this.findAllBooks();
     this.page.update((current) => current - 1);
+    this.findAllBooks();
   }
 
   goToFirstPage() {
-    //this.page = 0;
-    //this.findAllBooks();
     this.page.set(0);
+    this.findAllBooks();
   }
-
-  /*
-  isLastPage(): boolean {
-    if (this.bookResponse === undefined || this.bookResponse === null) {
-      return true;
-    } else {
-      return this.page === this.bookResponse?.total_pages as number - 1;
-    }
-  } */
 
   private findAllBooks() {
     this.bookService

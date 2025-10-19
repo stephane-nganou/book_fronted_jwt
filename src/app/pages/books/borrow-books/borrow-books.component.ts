@@ -88,21 +88,22 @@ export class BorrowBooksComponent {
 
   goToLastPage() {
     this.page.set(this.borrowedBooksPage().total_pages - 1);
-    this.getAllBorrowedBooks(); // will be triggered automatically
+    this.getAllBorrowedBooks();
   }
 
   goToNextPage() {
     this.page.set(this.page() + 1);
-    this.getAllBorrowedBooks(); // will be triggered automatically
+    this.getAllBorrowedBooks();
   }
 
   goToPreviousPage() {
     this.page.update(current => current - 1);
-    this.getAllBorrowedBooks(); // will be triggered automatically
+    this.getAllBorrowedBooks();
   }
 
   goToFirstPage() {
     this.page.set(0);
+    this.getAllBorrowedBooks();
   }
 
   getAllBorrowedBooks() {

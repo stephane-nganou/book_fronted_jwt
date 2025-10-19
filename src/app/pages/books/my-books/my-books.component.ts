@@ -31,9 +31,9 @@ export class MyBooksComponent {
 
   isLastPage = computed(() => {
     const response = this.bookResponse();
-    if(!response){
+    if (!response) {
       return true;
-    }else{
+    } else {
       return this.page() === response.total_pages as number;
     }
   });
@@ -87,24 +87,37 @@ export class MyBooksComponent {
   }
 
   goToPage(page: number) {
-    this.page.set(page);
+    if (this.bookResponse()) {
+      if (page < 0 || page > this.bookResponse()!.total_pages) {
+        this.page.set(0);
+      } else {
+        this.page.set(0);
+      }
+
+      this.findAllBooks()
+    }
+
   }
 
   goToLastPage() {
     const totalPages = this.bookResponse()?.total_pages ?? 0;
-    this.page.set(totalPages - 1);
+    this.page.set(totalPages);
+    this.findAllBooks();
   }
 
   goToNextPage() {
     this.page.update((current) => current + 1);
+    this.findAllBooks();
   }
 
   goToPreviousPage() {
     this.page.update((current) => current - 1);
+    this.findAllBooks();
   }
 
   goToFirstPage() {
     this.page.set(0);
+    this.findAllBooks();
   }
 
   private findAllBooks() {
