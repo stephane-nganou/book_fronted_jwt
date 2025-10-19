@@ -1,11 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { AuthenticationRequest, AuthenticationResponse } from '../../services/models';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../../services/services';
 import { TokenService } from '../../services/token/token.service';
-import { ApiErrorResponse } from '../../services/models/api-error-response';
-import { JsonParserService } from '../../services/json-parser.service';
 import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { DefaulErrorHandlerService } from '../../services/error/default-error-handler.service';

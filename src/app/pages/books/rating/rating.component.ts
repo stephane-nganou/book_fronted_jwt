@@ -1,5 +1,5 @@
 import { NgFor } from '@angular/common';
-import { Component, computed, input, Input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
 
 /**

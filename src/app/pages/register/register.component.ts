@@ -1,7 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RegisterRequest } from '../../services/models';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthenticationService } from '../../services/services';
 import { CommonModule } from '@angular/common';
 import { DefaulErrorHandlerService } from '../../services/error/default-error-handler.service';
