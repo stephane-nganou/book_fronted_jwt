@@ -1,6 +1,6 @@
 import { Component, computed, effect, signal } from '@angular/core';
 import { PageBorrowedBookResponse } from '../../../services/models/page-borrowed-book-response';
-import { NgIf, NgClass } from '@angular/common';
+import { NgIf, NgClass, NgFor} from '@angular/common';
 import { BorrowedBookResponse } from '../../../services/models/borrowed-book-response';
 import { BookService, FeedbackService } from '../../../services/services';
 import { FeedbackRequest, PageResponse } from '../../../services/models';
@@ -17,13 +17,17 @@ import { DefaulErrorHandlerService } from '../../../services/error/default-error
  */
 @Component({
   selector: 'app-borrow-books',
-  imports: [NgIf, FormsModule, RatingComponent, NgClass],
+  imports: [NgIf, FormsModule, RatingComponent, NgClass, NgFor],
   templateUrl: './borrow-books.component.html',
   styleUrl: './borrow-books.component.css'
 })
 export class BorrowBooksComponent {
 
-  borrowedBooksPage = signal<PageBorrowedBookResponse>({
+  page = signal<number>(0);
+  size = signal<number>(10);
+  message = signal<string[]>([]);
+  level = signal<string>('success');
+  borrowedBooksResponse = signal<PageBorrowedBookResponse>({
     content: [],
     first: false,
     last: false,
@@ -33,20 +37,20 @@ export class BorrowBooksComponent {
     total_pages: 0
   });
 
+  selectedBookResponse = signal<BorrowedBookResponse | undefined>(undefined);
   feedbackRequest = signal<FeedbackRequest>({
     book_id: 0,
     comment: '',
     note: 0
   });
 
-  selectedBookResponse = signal<BorrowedBookResponse | undefined>(undefined);
-
-  page = signal<number>(0);
-  size = signal<number>(5);
-  errorMsg = signal<string[]>([]);
-
-  isLastPage = computed(() => this.borrowedBooksPage().total_pages);
-  pageNumbers = computed(() => Array.from({length: this.borrowedBooksPage().total_pages }, (_, i) => i))
+  isLastPage = computed(() => {
+    if (this.borrowedBooksResponse().total_elements === 0) {
+      return true;
+    } else {
+      return this.page() === this.borrowedBooksResponse().total_pages as number - 1;
+    }
+  });
 
   constructor(
     private bookService: BookService,
@@ -71,7 +75,7 @@ export class BorrowBooksComponent {
         this.getAllBorrowedBooks();
       },
       error: (error) => {
-        this.errorMsg.set(this.errorHandlerService.handleError(error));
+        this.message.set(this.errorHandlerService.handleError(error));
       }
     });
   }
@@ -82,17 +86,27 @@ export class BorrowBooksComponent {
   }
 
   goToPage(page: number) {
-    this.page.set(page);
-    this.getAllBorrowedBooks();
+    if (this.borrowedBooksResponse()) {
+      if (page < 0 || page > this.borrowedBooksResponse()!.total_pages) {
+        this.page.set(0);
+      } else {
+        this.page.set(page);
+      }
+
+      this.getAllBorrowedBooks()
+    }
+
   }
 
   goToLastPage() {
-    this.page.set(this.borrowedBooksPage().total_pages - 1);
+    let totalPages = this.borrowedBooksResponse()?.total_pages ?? 1;
+    totalPages = (totalPages <= 0) ? 0 : totalPages - 1
+    this.page.set(totalPages);
     this.getAllBorrowedBooks();
   }
 
   goToNextPage() {
-    this.page.set(this.page() + 1);
+    this.page.update(current => current + 1);
     this.getAllBorrowedBooks();
   }
 
@@ -112,10 +126,10 @@ export class BorrowBooksComponent {
       size: this.size()
     }).subscribe({
       next: (response: PageResponse) => {
-        this.borrowedBooksPage.set(response as PageBorrowedBookResponse);
+        this.borrowedBooksResponse.set(response as PageBorrowedBookResponse);
       },
       error: (error) => {
-        this.errorMsg.set(this.errorHandlerService.handleError(error));
+        this.message.set(this.errorHandlerService.handleError(error));
       }
     })
   }
@@ -126,7 +140,7 @@ export class BorrowBooksComponent {
     }).subscribe({
       next: () => { },
       error: (error) => {
-        this.errorMsg.set(this.errorHandlerService.handleError(error));
+        this.message.set(this.errorHandlerService.handleError(error));
       }
     })
   }

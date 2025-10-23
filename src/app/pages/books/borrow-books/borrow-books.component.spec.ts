@@ -1,13 +1,12 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { BorrowBooksComponent } from "./borrow-books.component"
 import { BookService, FeedbackService } from "../../../services/services";
-import { JsonParserService } from "../../../services/json-parser.service";
 import { BorrowedBookResponse } from "../../../services/models/borrowed-book-response";
 import { PageBorrowedBookResponse } from "../../../services/models/page-borrowed-book-response";
 import { RatingComponent } from "../rating/rating.component";
 import { FormsModule } from "@angular/forms";
-import { of, throwError } from "rxjs";
 import { By } from "@angular/platform-browser";
+import { of, throwError } from "rxjs";
 import { ApiErrorResponse } from "../../../services/models/api-error-response";
 import { DefaulErrorHandlerService } from "../../../services/error/default-error-handler.service";
 
@@ -36,7 +35,7 @@ describe('BorrowBooksComponent', () => {
         first: true,
         last: false,
         number: 0,
-        size: 5,
+        size: 10,
         total_elements: 1,
         total_pages: 1
     };
@@ -72,13 +71,14 @@ describe('BorrowBooksComponent', () => {
         expect(component).toBeTruthy();
     });
 
+    
     it('should initialize with borrowed books', fakeAsync(() => {
         // test
         tick();
 
         // verify
-        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({ page: 0, size: 5 });
-        expect(component.borrowedBooksPage()).toEqual(mockPageResponse);
+        expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({ page: 0, size: 10 });
+        expect(component.borrowedBooksResponse()).toEqual(mockPageResponse);
     }));
 
     
@@ -130,7 +130,7 @@ describe('BorrowBooksComponent', () => {
 
         // verify
         expect(bookServiceSpy.returnBorrowBook).toHaveBeenCalledWith({ "book-id": mockBorrowedBookResponse.id });
-        expect(component.borrowedBooksPage()).toBe(mockPageResponse);
+        expect(component.borrowedBooksResponse()).toBe(mockPageResponse);
         expect(component.selectedBookResponse()).toBeDefined();
         expect(feedbackServceSpy.saveFeedback).not.toHaveBeenCalled();
     }));
@@ -156,7 +156,7 @@ describe('BorrowBooksComponent', () => {
             expect(feedbackServceSpy.saveFeedback).toHaveBeenCalled();
             expect(component.selectedBookResponse()).toBeUndefined();
             expect(component.selectedBookResponse()).toBeUndefined();
-            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 10});
         })
     );
 
@@ -165,27 +165,28 @@ describe('BorrowBooksComponent', () => {
             component.goToNextPage();
             tick();
             expect(component.page()).toBe(1);
-            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 1, size: 5});
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 1, size: 10});
             
             component.goToPreviousPage();
             tick();
             expect(component.page()).toBe(0);
-            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
-
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 10});
+            
             component.goToLastPage();
             tick();
             expect(component.page()).toBe(0);
-            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
-
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 10});
+            
             component.goToFirstPage();
             tick();
             expect(component.page()).toBe(0);
-            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 5});
-
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 10});
+            
             component.goToPage(2);
             tick();
-            expect(component.page()).toBe(2);
-            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 2, size: 5});
+            expect(component.page()).toBe(0);
+            expect(bookServiceSpy.getAllBorrowedBooks).toHaveBeenCalledWith({page: 0, size: 10});
+            
         }
         )
     );
@@ -193,7 +194,7 @@ describe('BorrowBooksComponent', () => {
     
     it('should disable next page button when on last page', () => {
         // prepare
-        component.borrowedBooksPage.set({ ...mockPageResponse, last: true });
+        component.borrowedBooksResponse.set({ ...mockPageResponse, last: true });
         component.page.set(0);
 
         // test
@@ -225,7 +226,7 @@ describe('BorrowBooksComponent', () => {
 
             // verify
             expect(errorHandlerServiceSpy.handleError).toHaveBeenCalled();
-            expect(component.errorMsg()).toEqual(['Error 1', 'Error 2']);
+            expect(component.message()).toEqual(['Error 1', 'Error 2']);
             const errorDiv = fixture.debugElement.query(By.css('.alert.alert-danger'));
             expect(errorDiv).toBeTruthy();
             expect(errorDiv.queryAll(By.css('p')).length).toBe(2);
@@ -252,7 +253,7 @@ describe('BorrowBooksComponent', () => {
             fixture.detectChanges();
 
             // verify
-            expect(component.errorMsg()).toEqual(['Server error']);
+            expect(component.message()).toEqual(['Server error']);
         })
     );
 

@@ -91,7 +91,7 @@ export class MyBooksComponent {
       if (page < 0 || page > this.bookResponse()!.total_pages) {
         this.page.set(0);
       } else {
-        this.page.set(0);
+        this.page.set(page);
       }
 
       this.findAllBooks()
